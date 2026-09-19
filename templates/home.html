@@ -1,0 +1,1211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arikey Skincare — Reveal Your Brightest, Most Even Skin</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf6ef;
+    --cream-2:#f3ede1;
+    --ink:#1c1410;
+    --ink-soft:#4a4038;
+    --coral:#d1495b;
+    --coral-dark:#b83a4b;
+    --gold:#c9a227;
+    --tan-1:#cbab7f;
+    --tan-2:#e2c79a;
+    --line:rgba(28,20,16,0.12);
+    --radius:2px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Jost',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 40px;}
+  .eyebrow{
+    letter-spacing:.18em;font-size:.75rem;font-weight:600;text-transform:uppercase;color:var(--coral);
+  }
+
+  /* ---------- HEADER (compact) ---------- */
+  header{
+    position:sticky;top:0;z-index:100;height:62px;
+    background:rgba(250,246,239,0.0);
+    transition:background .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+  }
+  header.solid{
+    background:rgba(250,246,239,0.92);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    height:62px;padding:8px 40px;max-width:1280px;margin:0 auto;
+  }
+  .logo{font-size:1.2rem;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;gap:10px;}
+  .brand-logo{width:38px;height:38px;object-fit:contain;flex:0 0 38px;}
+  header.on-hero .logo, header.on-hero .navlink{color:#fff;}
+  header:not(.on-hero) .logo, header:not(.on-hero) .navlink{color:var(--ink);}
+  nav.navlinks{display:flex;gap:38px;}
+  .navlink{
+    font-size:.8rem;letter-spacing:.1em;font-weight:500;text-transform:uppercase;
+    position:relative;padding-bottom:4px;
+  }
+  .navlink::after{
+    content:'';position:absolute;left:0;bottom:0;width:0;height:1px;background:currentColor;
+    transition:width .3s ease;
+  }
+  .navlink:hover::after{width:100%;}
+  .cart-btn{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:34px;height:34px;
+  }
+  .cart-btn svg{width:19px;height:19px;stroke:currentColor;}
+  header.on-hero .cart-btn{color:#1c1410;}
+  header:not(.on-hero) .cart-btn{color:var(--ink);}
+  .cart-badge{
+    position:absolute;top:-2px;right:-2px;background:var(--coral);color:#fff;
+    font-size:.62rem;font-weight:600;width:16px;height:16px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .menu-toggle{display:none;width:24px;height:18px;position:relative;}
+  .menu-toggle span{
+    position:absolute;left:0;width:100%;height:2px;background:currentColor;transition:.3s;
+  }
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+  header.on-hero .menu-toggle{color:#fff;}
+  header:not(.on-hero) .menu-toggle{color:var(--ink);}
+
+  /* ---------- HERO — CAMPAIGN BACKGROUND ---------- */
+  .hero{
+    position:relative; min-height:calc(100vh - 0px); overflow:hidden;
+    display:flex; align-items:center; color:#fff; margin-top:-59px; isolation:isolate;
+    background-image:url('{% static "images/hero-campaign.png" %}');
+    background-size:cover; background-position:center center; background-repeat:no-repeat;
+  }
+  .hero::before{
+    content:""; position:absolute; inset:0; z-index:0;
+    background:linear-gradient(90deg,rgba(37,20,10,.76) 0%,rgba(45,25,13,.58) 28%,rgba(45,25,13,.16) 52%,rgba(30,16,8,.02) 72%);
+  }
+  .hero::after{
+    content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:linear-gradient(180deg,rgba(20,10,5,.08),transparent 35%,rgba(20,10,5,.12));
+  }
+  .hero-shell{
+    width:min(1280px,100%); margin:0 auto; padding:145px 40px 86px;
+    position:relative; z-index:2; display:block;
+  }
+  .hero-copy{max-width:590px; animation:heroCopyIn .9s cubic-bezier(.2,.75,.25,1) both;}
+  .hero-kicker{
+    display:flex;align-items:center;gap:14px;margin-bottom:24px;color:#f4d9a8;
+    font-size:.72rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  }
+  .hero-kicker::after{content:"";width:72px;height:1px;background:rgba(244,217,168,.65);}
+  .hero h1{
+    font-size:clamp(3.5rem,5.7vw,5.9rem); line-height:.93; font-weight:500;
+    letter-spacing:-.045em; margin:0 0 25px; text-shadow:0 10px 38px rgba(0,0,0,.2);
+  }
+  .hero h1 em{font-weight:500;color:#f5c7cc;}
+  .hero p.sub{max-width:520px;font-size:1rem;line-height:1.7;font-weight:300;color:rgba(255,255,255,.86);margin-bottom:32px;}
+  .hero-ctas{display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin:0;}
+  .hero .btn-primary{position:relative;overflow:hidden;background:var(--coral);color:#fff;padding:17px 31px;box-shadow:0 14px 30px rgba(209,73,91,.22);}
+  .hero .btn-primary::after{content:"";position:absolute;top:-50%;left:-70%;width:40%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);transform:rotate(18deg);transition:left .6s ease;}
+  .hero .btn-primary:hover::after{left:130%;}
+  .hero-link{color:#fff;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;display:inline-flex;align-items:center;gap:11px;padding:12px 0;}
+  .hero-link span{transition:transform .3s ease}.hero-link:hover span{transform:translateX(6px)}
+  .hero-proof{margin-top:38px;padding-top:22px;border-top:1px solid rgba(255,255,255,.18);display:flex;gap:28px;max-width:540px;}
+  .proof-item{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.78);font-size:.72rem;letter-spacing:.02em;}
+  .proof-dot{width:7px;height:7px;border-radius:50%;background:#e8bd72;box-shadow:0 0 0 5px rgba(232,189,114,.1);}
+  .hero-scroll{position:absolute;left:max(40px,calc((100vw - 1280px)/2 + 40px));bottom:25px;z-index:3;display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.62);font-size:.62rem;letter-spacing:.17em;text-transform:uppercase;}
+  .hero-scroll::before{content:"";width:35px;height:1px;background:rgba(255,255,255,.42);}
+  @keyframes heroCopyIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  @media(max-width:980px){
+    .hero{background-position:62% center;}
+    .hero::before{background:linear-gradient(90deg,rgba(37,20,10,.78) 0%,rgba(45,25,13,.58) 42%,rgba(45,25,13,.12) 70%);}
+    .hero-shell{padding-left:28px;padding-right:28px}.hero-copy{max-width:520px}.hero-proof{gap:18px;flex-wrap:wrap}
+  }
+  @media(max-width:720px){
+    .hero{margin-top:-53px;min-height:760px;background-position:66% center;align-items:flex-end;}
+    .hero::before{background:linear-gradient(180deg,rgba(28,15,8,.16) 0%,rgba(28,15,8,.24) 34%,rgba(28,15,8,.82) 72%,rgba(28,15,8,.92) 100%);}
+    .hero-shell{padding:115px 22px 58px;}.hero-copy{max-width:100%;}.hero-kicker{font-size:.64rem;margin-bottom:16px}
+    .hero h1{font-size:clamp(3rem,14vw,4.4rem);}.hero p.sub{font-size:.92rem;line-height:1.6;margin-bottom:25px}.hero-proof{margin-top:26px;padding-top:18px}.hero-scroll{display:none}
+  }
+
+  /* ---------- SECTION HEADINGS ---------- */
+  .sec-head{text-align:center;max-width:640px;margin:0 auto 56px;}
+  .sec-head h2{font-size:clamp(2rem,4vw,2.8rem);font-weight:600;margin:14px 0 16px;}
+  .sec-head p{color:var(--ink-soft);font-size:1.02rem;line-height:1.7;font-weight:300;}
+
+  /* ---------- PRODUCTS ---------- */
+  .products{padding:110px 0 90px;background:var(--cream);}
+  .product-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:26px;
+  }
+  .product-card{cursor:pointer;}
+  .product-media{
+    position:relative;border-radius:6px;overflow:hidden;aspect-ratio:1/1;
+    margin-bottom:20px;background:linear-gradient(160deg,#efe3cd,#e3d0ac);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .45s ease;
+  }
+  .product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+  .product-card:hover .product-media{transform:translateY(-6px);}
+  .product-media .soap-mini{
+    width:58%;height:36%;border-radius:16px;
+    background:linear-gradient(135deg,#fbf5e6,#ecdcb9);
+    box-shadow:0 14px 30px rgba(60,40,10,.18);
+  }
+  .pm-round{border-radius:50%;width:52%;height:52%;}
+  .pm-black{background:linear-gradient(135deg,#2a2420,#100d0b);position:relative;}
+  .pm-black::after{
+    content:'';position:absolute;inset:14% 18%;border-radius:50%;
+    background:conic-gradient(from 0deg,#caa237,#8a6e1c,#caa237,#8a6e1c);opacity:.55;
+  }
+  .badge-tag{
+    position:absolute;top:16px;left:16px;background:var(--coral);color:#fff;
+    font-size:.68rem;font-weight:600;letter-spacing:.04em;padding:6px 14px;border-radius:30px;
+  }
+  .p-cat{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .p-name{font-family:'Playfair Display',serif;font-weight:600;font-size:1.08rem;margin-bottom:8px;line-height:1.3;}
+  .p-rating{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+  .stars{color:var(--gold);font-size:.85rem;letter-spacing:1px;}
+  .p-count{color:var(--ink-soft);font-size:.78rem;}
+  .p-price{font-family:'Playfair Display',serif;font-weight:700;font-size:1.15rem;}
+  .p-price .was{
+    font-weight:400;font-size:.95rem;color:var(--ink-soft);text-decoration:line-through;margin-left:8px;
+  }
+  .view-all{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin:56px auto 0;color:var(--coral);font-weight:600;letter-spacing:.1em;
+    font-size:.85rem;text-transform:uppercase;width:fit-content;
+  }
+  .view-all svg{width:16px;height:16px;transition:transform .3s ease;}
+  .view-all:hover svg{transform:translateX(5px);}
+
+  /* ---------- COMBO DEALS ---------- */
+  .combos{padding:90px 0 100px;background:var(--cream);}
+  .combo-banner{
+    position:relative;border-radius:8px;overflow:hidden;padding:52px 56px;
+    min-height:280px;display:flex;flex-direction:column;justify-content:center;
+    margin-bottom:44px;
+    background:linear-gradient(120deg, rgba(28,20,16,.55), rgba(80,55,30,.4)),
+               linear-gradient(135deg,#cbab7f,#a9855a);
+  }
+  .combo-banner-img{
+    position:absolute;inset:0;z-index:0;
+  }
+  .combo-banner-img .ph{
+    width:100%;height:100%;
+    background:repeating-linear-gradient(45deg,#cbab7f,#cbab7f 12px,#d8c9a9 12px,#d8c9a9 24px);
+    border:2px dashed rgba(255,255,255,.35);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .combo-banner-img .ph span{
+    font-size:12px;color:#fff;background:rgba(0,0,0,.35);padding:6px 12px;border-radius:6px;
+    max-width:70%;text-align:center;
+  }
+  .combo-banner-content{position:relative;z-index:2;max-width:640px;}
+  .combo-badge{
+    display:inline-block;padding:8px 20px;border-radius:30px;font-size:.72rem;
+    letter-spacing:.16em;font-weight:600;text-transform:uppercase;color:#f0d9a0;
+    background:rgba(255,255,255,.12);margin-bottom:20px;
+  }
+  .combo-banner h2{color:#fff;font-size:clamp(1.8rem,3.6vw,2.6rem);font-weight:600;margin-bottom:16px;line-height:1.15;}
+  .combo-banner p{color:rgba(255,255,255,.9);font-size:.98rem;line-height:1.6;font-weight:300;margin-bottom:28px;max-width:520px;}
+  .combo-cta{
+    display:inline-flex;align-items:center;gap:10px;background:var(--coral);color:#fff;
+    padding:16px 30px;border-radius:4px;font-weight:600;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;
+    transition:.3s;width:fit-content;
+  }
+  .combo-cta:hover{background:var(--coral-dark);transform:translateY(-2px);}
+  .combo-cta svg{width:15px;height:15px;}
+
+  .combo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  .combo-grid.combo-grid-3{grid-template-columns:repeat(3,1fr);margin-top:24px;}
+  .combo-card{cursor:pointer;}
+  .combo-media{
+    position:relative;border-radius:6px;overflow:hidden;aspect-ratio:1/0.92;margin-bottom:16px;
+  }
+  .combo-media .ph{
+    width:100%;height:100%;
+    background:repeating-linear-gradient(45deg,#e7ded0,#e7ded0 10px,#ede6da 10px,#ede6da 20px);
+    border:2px dashed #c7bba3;display:flex;align-items:center;justify-content:center;text-align:center;
+    transition:transform .45s ease;
+  }
+  .combo-card:hover .ph{transform:scale(1.05);}
+  .combo-media .ph span{
+    font-size:11.5px;color:#7a6f5c;background:rgba(248,243,234,.85);padding:6px 10px;border-radius:6px;max-width:82%;
+  }
+  .combo-badge-row{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;z-index:2;pointer-events:none;}
+  .combo-tag{font-size:.68rem;font-weight:600;letter-spacing:.02em;padding:6px 13px;border-radius:30px;color:#fff;background:var(--coral);}
+  .combo-save{font-size:.68rem;font-weight:600;letter-spacing:.02em;padding:6px 13px;border-radius:30px;color:#fff;background:var(--gold);}
+  .combo-eyebrow{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--coral);font-weight:600;margin-bottom:6px;}
+  .combo-name{font-family:'Playfair Display',serif;font-weight:600;font-size:1.08rem;margin-bottom:8px;}
+  .combo-price{font-family:'Playfair Display',serif;font-weight:700;font-size:1.15rem;margin-bottom:8px;}
+  .combo-price .was{font-weight:400;font-size:.92rem;color:var(--ink-soft);text-decoration:line-through;margin-left:8px;font-family:'Jost',sans-serif;}
+  .combo-desc{color:var(--ink-soft);font-size:.85rem;line-height:1.55;font-weight:300;}
+
+  /* ---------- STORY (compact) ---------- */
+  .story{padding:56px 0;background:var(--cream-2);}
+  .story-inner{
+    display:grid;grid-template-columns:0.85fr 1fr;gap:44px;align-items:center;
+  }
+  .story-img{
+    aspect-ratio:4/3;border-radius:4px;overflow:hidden;
+    background:linear-gradient(160deg,#8a6b4c,#4a372a);
+    position:relative;
+  }
+  .story-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+  .story-img::after{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 60% 30%, rgba(230,190,130,.35), transparent 60%);
+  }
+  .story-text h2{font-size:clamp(1.5rem,2.6vw,1.9rem);font-weight:600;margin:8px 0 12px;line-height:1.22;}
+  .story-text p{color:var(--ink-soft);font-size:.92rem;line-height:1.6;font-weight:300;margin-bottom:12px;}
+  .story-text .btn-outline-dark{
+    margin-top:4px;border:1.5px solid var(--ink);color:var(--ink);
+    padding:12px 24px;font-size:.75rem;letter-spacing:.12em;font-weight:600;text-transform:uppercase;
+    display:inline-block;transition:.3s;
+  }
+  .story-text .btn-outline-dark:hover{background:var(--ink);color:#fff;}
+
+  /* ---------- TESTIMONIALS (compact) ---------- */
+  .testimonials{padding:64px 0;background:var(--cream);}
+  .testimonials .sec-head{margin:0 auto 36px;}
+  .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .t-card{
+    background:#fff;border:1px solid var(--line);border-radius:6px;padding:22px 20px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .t-card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(28,20,16,.08);}
+  .t-stars{color:var(--gold);font-size:.82rem;letter-spacing:2px;margin-bottom:10px;}
+  .t-quote{
+    font-style:italic;color:var(--ink-soft);line-height:1.55;font-size:.85rem;margin-bottom:16px;flex:1;
+    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .t-author{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--line);}
+  .t-avatar{
+    width:34px;height:34px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#e2b98a,#b8794f);
+  }
+  .t-name{font-weight:600;font-size:.82rem;}
+  .t-loc{font-size:.7rem;color:var(--ink-soft);}
+  .t-tag{
+    font-size:.6rem;background:var(--cream-2);padding:4px 8px;border-radius:20px;
+    color:var(--ink-soft);margin-left:auto;text-align:right;white-space:nowrap;
+  }
+
+  /* ---------- NEWSLETTER ---------- */
+  .newsletter{
+    position:relative;padding:110px 24px;text-align:center;color:#fff;overflow:hidden;
+    background:linear-gradient(160deg,#3a2a20,#241a14);
+  }
+  .newsletter::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(circle 140px at 8% 20%, rgba(230,190,130,.18), transparent 70%),
+      radial-gradient(circle 180px at 92% 30%, rgba(230,190,130,.14), transparent 70%),
+      radial-gradient(circle 160px at 15% 85%, rgba(230,190,130,.15), transparent 70%),
+      radial-gradient(circle 200px at 88% 90%, rgba(230,190,130,.12), transparent 70%);
+  }
+  .newsletter-inner{position:relative;z-index:2;max-width:600px;margin:0 auto;}
+  .newsletter .eyebrow{color:var(--gold);}
+  .newsletter h2{font-size:clamp(1.9rem,3.8vw,2.6rem);font-weight:600;margin:14px 0 18px;}
+  .newsletter p{color:rgba(255,255,255,.78);font-weight:300;line-height:1.7;margin-bottom:36px;}
+  .newsletter p b{color:#fff;font-weight:600;}
+  .nl-form{display:flex;gap:12px;margin-bottom:16px;}
+  .nl-form input{
+    flex:1;padding:17px 20px;border-radius:4px;border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08);color:#fff;font-family:inherit;font-size:.95rem;
+  }
+  .nl-form input::placeholder{color:rgba(255,255,255,.55);}
+  .nl-form input:focus{outline:2px solid var(--coral);outline-offset:2px;}
+  .nl-form button{
+    background:var(--coral);color:#fff;padding:0 32px;border-radius:4px;
+    font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    transition:.3s;white-space:nowrap;
+  }
+  .nl-form button:hover{background:var(--coral-dark);}
+  .nl-note{font-size:.8rem;color:rgba(255,255,255,.55);}
+  .nl-success{color:#e8cf9c;font-size:.9rem;margin-top:14px;display:none;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:#170f0c;color:rgba(255,255,255,.7);padding:80px 0 0;}
+  .footer-grid{
+    display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;padding-bottom:60px;
+  }
+  .footer-logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:16px;}
+  .footer-desc{font-size:.92rem;line-height:1.75;margin-bottom:24px;max-width:340px;}
+  .socials{display:flex;gap:12px;}
+  .social-ic{
+    width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);
+    display:flex;align-items:center;justify-content:center;transition:.3s;
+  }
+  .social-ic:hover{background:var(--coral);}
+  .social-ic svg{width:16px;height:16px;fill:#fff;}
+  .f-title{color:#fff;font-size:.78rem;letter-spacing:.14em;font-weight:600;text-transform:uppercase;margin-bottom:22px;}
+  .f-links{display:flex;flex-direction:column;gap:14px;}
+  .f-links a{font-size:.92rem;transition:.25s;}
+  .f-links a:hover{color:#fff;}
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,.1);padding:26px 0;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+    font-size:.82rem;color:rgba(255,255,255,.5);
+  }
+  .pay-icons{display:flex;align-items:center;gap:14px;}
+  .pay-icons span{
+    border:1px solid rgba(255,255,255,.2);padding:4px 8px;border-radius:3px;font-size:.68rem;font-weight:600;
+  }
+
+  /* ---------- MOBILE NAV ---------- */
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--ink);z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+    opacity:0;visibility:hidden;transform:translateY(-12px);
+    transition:opacity .3s ease, visibility .3s ease, transform .3s ease;
+  }
+  .mobile-menu.open{opacity:1;visibility:visible;transform:translateY(0);}
+  .mobile-menu a{color:#fff;font-size:1.3rem;font-family:'Playfair Display',serif;}
+  .mobile-close{position:absolute;top:28px;right:32px;color:#fff;font-size:1.8rem;width:30px;height:30px;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 980px){
+    .product-grid{grid-template-columns:repeat(2,1fr);}
+    .combo-grid{grid-template-columns:repeat(2,1fr);}
+    .combo-grid.combo-grid-3{grid-template-columns:repeat(2,1fr);}
+    .story-inner{grid-template-columns:1fr;gap:32px;}
+    .t-grid{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr 1fr;row-gap:40px;}
+  }
+  @media (max-width: 720px){
+    nav.navlinks{display:none;}
+    .menu-toggle{display:block;}
+    .wrap{padding:0 22px;}
+    .header-inner{height:62px;padding:8px 22px;}
+    .hero{margin-top:-53px;}
+    .hero-content{padding:140px 18px 50px;}
+    .hero-stats{flex-wrap:wrap;justify-content:center;row-gap:20px;}
+    .stat{padding:0 20px;}
+    .product-grid{grid-template-columns:1fr 1fr;gap:16px;}
+    .products{padding:70px 0;}
+    .combos{padding:50px 0 60px;}
+    .combo-banner{padding:34px 24px;min-height:auto;}
+    .combo-grid{grid-template-columns:1fr;}
+    .combo-grid.combo-grid-3{grid-template-columns:1fr;}
+    .story{padding:44px 0;}
+    .testimonials{padding:48px 0;}
+    .nl-form{flex-direction:column;}
+    .footer-grid{grid-template-columns:1fr;gap:34px;}
+    .footer-bottom{flex-direction:column;align-items:flex-start;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+
+  /* scroll reveal */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  :focus-visible{outline:2px solid var(--coral);outline-offset:3px;}
+
+
+  /* MOBILE COMBO COMPACTNESS */
+  @media(max-width:720px){
+    .combo-grid,
+    .combo-grid.combo-grid-3{
+      grid-template-columns:1fr 1fr;
+      gap:14px 12px;
+      margin-top:14px;
+    }
+    .combo-media{
+      margin-bottom:9px;
+      border-radius:5px;
+    }
+    .combo-tag,.combo-save{
+      font-size:.56rem;
+      padding:4px 7px;
+    }
+    .combo-eyebrow{
+      font-size:.58rem;
+      margin-bottom:3px;
+    }
+    .combo-name{
+      font-size:.82rem;
+      margin-bottom:4px;
+    }
+    .combo-price{
+      font-size:.82rem;
+      margin-bottom:4px;
+    }
+    .combo-price .was{
+      font-size:.68rem;
+      margin-left:4px;
+    }
+    .combo-desc{
+      font-size:.68rem;
+      line-height:1.4;
+    }
+  }
+
+  @media(max-width:430px){
+    .combo-grid,
+    .combo-grid.combo-grid-3{
+      gap:12px 9px;
+    }
+    .combo-name,.combo-price{font-size:.76rem;}
+    .combo-desc{font-size:.63rem;}
+  }
+
+  /* ---------- UNIFIED NAVBAR ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+
+  .header-inner{
+    height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 40px;
+    max-width:1280px;
+    margin:0 auto;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.2rem;
+    font-weight:700;
+    letter-spacing:.01em;
+    min-width:0;
+  }
+
+  .brand-logo{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    display:block;
+    flex:0 0 38px;
+  }
+
+  .logo-text{
+    white-space:nowrap;
+  }
+
+  nav.navlinks{
+    display:flex;
+    gap:38px;
+  }
+
+  .navlink{
+    font-size:.8rem;
+    letter-spacing:.1em;
+    font-weight:500;
+    text-transform:uppercase;
+    position:relative;
+    padding-bottom:4px;
+    color:var(--ink);
+  }
+
+  .navlink.active{
+    color:var(--coral);
+  }
+
+  .navlink::after{
+    content:'';
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:0;
+    height:1px;
+    background:currentColor;
+    transition:width .3s ease;
+  }
+
+  .navlink:hover::after{
+    width:100%;
+  }
+
+  .cart-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    color:var(--ink);
+    border:none;
+    background:transparent;
+    padding:0;
+  }
+
+  .cart-btn svg{
+    width:19px;
+    height:19px;
+    stroke:currentColor;
+  }
+
+  .cart-badge{
+    position:absolute;
+    top:-2px;
+    right:-2px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.62rem;
+    font-weight:600;
+  }
+
+  .menu-toggle{
+    display:none;
+    width:24px;
+    height:18px;
+    position:relative;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+  }
+
+  .menu-toggle span{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:2px;
+    background:currentColor;
+  }
+
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+
+  .mobile-menu{
+    position:fixed;
+    inset:0;
+    background:var(--ink);
+    z-index:200;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:30px;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:.3s ease;
+  }
+
+  .mobile-menu.open{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+
+  .mobile-menu a{
+    color:#fff;
+    font-size:1.2rem;
+    font-family:'Playfair Display',serif;
+  }
+
+  .mobile-close{
+    position:absolute;
+    top:24px;
+    right:24px;
+    width:32px;
+    height:32px;
+    border:none;
+    background:transparent;
+    color:#fff;
+    font-size:1.8rem;
+  }
+
+  @media(max-width:720px){
+    .header-inner{
+      padding:8px 16px;
+    }
+
+    .logo{
+      gap:7px;
+      font-size:1rem;
+    }
+
+    .brand-logo{
+      width:38px;
+      height:38px;
+      flex-basis:38px;
+    }
+
+    nav.navlinks{
+      display:none;
+    }
+
+    .menu-toggle{
+      display:block;
+    }
+  }
+
+  @media(max-width:360px){
+    .logo-text{
+      font-size:.92rem;
+    }
+
+    .header-inner{
+      padding-left:12px;
+      padding-right:12px;
+    }
+  }
+
+
+  /* ---------- HOME MOBILE ---------- */
+  @media(max-width:720px){
+    .wrap{padding:0 16px;}
+    .hero{margin-top:-62px;min-height:650px;background-position:68% center;}
+    .hero-shell{padding:112px 16px 44px;}
+    .hero-copy{max-width:100%;}
+    .hero-kicker{font-size:.6rem;margin-bottom:13px;}
+    .hero h1{font-size:clamp(2.6rem,13vw,3.9rem);line-height:.95;margin-bottom:18px;}
+    .hero p.sub{font-size:.86rem;line-height:1.55;margin-bottom:20px;}
+    .hero-ctas{gap:16px;}
+    .hero .btn-primary{padding:13px 20px;font-size:.76rem;}
+    .hero-link{font-size:.68rem;}
+    .hero-proof{margin-top:22px;padding-top:14px;gap:12px;}
+    .proof-item{font-size:.64rem;}
+    .products{padding:54px 0;}
+    .sec-head{margin-bottom:30px;}
+    .sec-head h2{font-size:1.75rem;margin:8px 0 10px;}
+    .sec-head p{font-size:.82rem;line-height:1.5;}
+    .product-grid{grid-template-columns:1fr 1fr;gap:14px 10px;}
+    .product-media{margin-bottom:9px;}
+    .badge-tag{top:8px;left:8px;font-size:.56rem;padding:4px 7px;}
+    .p-cat{font-size:.58rem;margin-bottom:3px;}
+    .p-name{font-size:.78rem;margin-bottom:4px;min-height:0;}
+    .p-rating{margin-bottom:5px;}
+    .stars{font-size:.7rem;}
+    .p-count{font-size:.62rem;}
+    .p-price{font-size:.8rem;}
+    .view-all{margin-top:28px;font-size:.72rem;}
+    .combos{padding:40px 0 48px;}
+    .combo-banner{padding:26px 18px;min-height:210px;margin-bottom:24px;}
+    .combo-banner h2{font-size:1.55rem;}
+    .combo-banner p{font-size:.8rem;margin-bottom:18px;}
+    .combo-cta{padding:12px 18px;font-size:.7rem;}
+    .combo-grid,.combo-grid.combo-grid-3{grid-template-columns:1fr 1fr;gap:14px 10px;margin-top:12px;}
+    .story{padding:38px 0;}
+    .story-inner{grid-template-columns:1fr;gap:20px;}
+    .story-text h2{font-size:1.55rem;}
+    .story-text p{font-size:.82rem;}
+    .testimonials{padding:42px 0;}
+    .t-grid{grid-template-columns:1fr;gap:14px;}
+    .newsletter{padding:60px 16px;}
+    .newsletter h2{font-size:1.7rem;}
+    .newsletter p{font-size:.82rem;}
+    .nl-form{flex-direction:column;}
+    .nl-form input{padding:13px 14px;}
+    .nl-form button{padding:13px 18px;}
+    footer{padding-top:38px;}
+    .footer-grid{grid-template-columns:1fr;gap:22px;padding-bottom:26px;}
+  }
+
+  @media(max-width:390px){
+    .product-grid,.combo-grid,.combo-grid.combo-grid-3{gap:12px 8px;}
+    .p-name,.combo-name{font-size:.74rem;}
+    .combo-desc{font-size:.61rem;}
+  }
+
+
+  /* ---------- HOME TRANSPARENT NAVBAR ----------
+     Transparent over the hero; becomes solid after scrolling. */
+  #siteHeader{
+    background:transparent;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    box-shadow:none;
+    border-bottom:none;
+    transition:background .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+  }
+
+  #siteHeader.solid{
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="header-inner">
+    <a href="{% url 'home-page' %}" class="logo" aria-label="Arikey Skincare Home">
+      <img src="{% static 'images/logo.png' %}" alt="Arikey Skincare logo" class="brand-logo">
+      <span class="logo-text">Arikey Skincare</span>
+    </a>
+
+    <nav class="navlinks">
+      <a class="navlink active" href="{% url 'home-page' %}">Home</a>
+      <a class="navlink" href="{% url 'shop' %}">Shop</a>
+      <a class="navlink" href="{% url 'our-story' %}">Our Story</a>
+      <a class="navlink" href="{% url 'contact' %}">Contact</a>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a class="cart-btn" id="cartBtn" href="{% url 'cart' %}" aria-label="Shopping bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+        <span class="cart-badge" id="cartCount">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose" aria-label="Close menu">&times;</button>
+  <a href="{% url 'home-page' %}">Home</a>
+  <a href="{% url 'shop' %}">Shop</a>
+  <a href="{% url 'our-story' %}">Our Story</a>
+  <a href="{% url 'contact' %}">Contact</a>
+</div>
+
+<section class="hero" id="home">
+  <div class="hero-shell">
+    <div class="hero-copy">
+      <div class="hero-kicker">Skincare made for your glow</div>
+
+      <h1>Reveal the glow<br>that feels <em>like you.</em></h1>
+
+      <p class="sub">
+        Thoughtfully selected skincare for a smooth, radiant-looking complexion —
+        from everyday body care to your complete glow routine.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="{% url 'shop' %}" class="btn btn-primary">Shop Collection</a>
+        <a href="{% url 'our-story' %}" class="hero-link">Discover Arikey <span>→</span></a>
+      </div>
+
+      <div class="hero-proof">
+        <div class="proof-item"><span class="proof-dot"></span>Body &amp; face care</div>
+        <div class="proof-item"><span class="proof-dot"></span>Curated routines</div>
+        <div class="proof-item"><span class="proof-dot"></span>Made for everyday glow</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hero-scroll">Scroll to discover</div>
+</section>
+
+<section class="products" id="shop">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Shop Bestsellers</span>
+      <h2>Loved Across Nigeria</h2>
+      <p>Our most coveted 5D whitening formulas, trusted by thousands for visibly brighter, more even-toned skin.</p>
+    </div>
+
+    <div class="product-grid" id="productGrid">
+      <!-- injected by JS -->
+    </div>
+
+    <a href="{% url 'shop' %}" class="view-all reveal">
+      View All Products
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</section>
+
+<section class="combos" id="combos">
+  <div class="wrap">
+    <div class="combo-banner reveal">
+      <div class="combo-banner-img">
+        <img src="{% static 'images/hero-campaign.png' %}" alt="Arikey Products" style="width: 100%; height: 100%; object-fit: cover; object-position: center center;">>
+      </div>
+      <div class="combo-banner-content">
+        <span class="combo-badge">Combo Deals</span>
+        <h2>Save Big When You Bundle</h2>
+        <p>Curated sets of our best-selling formulas at a fraction of the individual price. The easiest way to build your full glow routine.</p>
+        <a href="{% url 'product-details' %}?id=101" class="combo-cta">
+          Shop All Bundles
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="combo-grid" id="comboGrid"></div>
+    <div class="combo-grid combo-grid-3" id="comboGrid2"></div>
+  </div>
+</section>
+
+<section class="story" id="story">
+  <div class="wrap story-inner">
+   <div class="story-img reveal">
+  <img src="{% static 'images/our-story.jpeg' %}" alt="Our Story - Arikey Skincare">
+</div>
+    <div class="story-text reveal">
+      <span class="eyebrow">Our Story</span>
+      <h2>African Skincare Wisdom, Powered by 5D Science</h2>
+      <p>Arikey Skincare began with a simple belief: every skin tone deserves to glow with confidence. We blend time-honored African botanicals with advanced 5D whitening technology.</p>
+      <a href="{% url 'our-story' %}" class="btn-outline-dark">Read Our Full Story</a>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Testimonials</span>
+      <h2>What Our Community Says</h2>
+      <p>Real stories from real Nigerians who trust Arikey Skincare for brighter, more even-toned skin.</p>
+    </div>
+    <div class="t-grid" id="testimonialGrid"></div>
+  </div>
+</section>
+
+<section class="newsletter" id="contact">
+  <div class="newsletter-inner">
+    <span class="eyebrow">Stay Connected</span>
+    <h2>Join the Arikey Family</h2>
+    <p>Be the first to know about new launches, exclusive offers, and skincare tips. Plus get <b>10% off</b> your first order.</p>
+    <form class="nl-form" id="nlForm">
+      <input type="email" required placeholder="Enter your email address" id="nlEmail" aria-label="Email address">
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="nl-note">No spam, ever. Unsubscribe anytime.</p>
+    <p class="nl-success" id="nlSuccess">Thanks for joining — check your inbox for your 10% code!</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Arikey Skincare</div>
+        <p class="footer-desc">Premium skincare crafted with powerful active ingredients for radiant, even-toned skin. We believe every skin tone deserves to glow with confidence.</p>
+        <div class="socials">
+          <a class="social-ic" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.97.24 2.43.4a4.9 4.9 0 0 1 1.77 1.15 4.9 4.9 0 0 1 1.15 1.77c.16.46.35 1.26.4 2.43.07 1.25.07 1.65.07 4.85s0 3.6-.07 4.85c-.05 1.17-.24 1.97-.4 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.46.16-1.26.35-2.43.4-1.25.07-1.65.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.97-.24-2.43-.4a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.16-.46-.35-1.26-.4-2.43C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.24-1.97.4-2.43A4.9 4.9 0 0 1 3.82 3a4.9 4.9 0 0 1 1.77-1.15c.46-.16 1.26-.35 2.43-.4C9.27 1.38 9.7 1.38 12 1.38zM12 6.3a5.7 5.7 0 1 0 0 11.4 5.7 5.7 0 0 0 0-11.4zm0 9.4a3.7 3.7 0 1 1 0-7.4 3.7 3.7 0 0 1 0 7.4zm5.9-9.6a1.33 1.33 0 1 1-2.66 0 1.33 1.33 0 0 1 2.66 0z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V8c0-.9.25-1.5 1.55-1.5H16.7V3.7C16.4 3.66 15.4 3.57 14.24 3.57c-2.4 0-4.04 1.46-4.04 4.15V9.9H7.5V13h2.7v8h3.3z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3v13.2a2.6 2.6 0 1 1-2.1-2.55v-3.05a5.6 5.6 0 1 0 5.1 5.58V8.9a7.4 7.4 0 0 0 4.4 1.44V7.35c-2.4 0-4.4-1.9-4.4-4.35v-1z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.65 19.3c-.05-.8-.1-2.05.02-2.93.11-.8.75-5.1.75-5.1s-.19-.38-.19-.94c0-.88.51-1.54 1.15-1.54.54 0 .8.4.8.89 0 .54-.35 1.36-.53 2.11-.15.63.32 1.14.94 1.14 1.13 0 1.99-1.19 1.99-2.9 0-1.52-1.09-2.58-2.65-2.58-1.8 0-2.86 1.35-2.86 2.75 0 .54.21 1.13.47 1.44a.19.19 0 0 1 .04.18c-.05.2-.16.63-.18.72-.03.12-.1.15-.22.09-.85-.4-1.38-1.63-1.38-2.63 0-2.14 1.56-4.11 4.48-4.11 2.35 0 4.18 1.68 4.18 3.92 0 2.34-1.47 4.22-3.52 4.22-.69 0-1.33-.36-1.55-.78l-.42 1.6c-.15.58-.56 1.31-.83 1.75A10 10 0 1 0 12 2z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <div class="f-title">Shop</div>
+        <div class="f-links">
+          <a href="{% url 'shop' %}">All Products</a>
+          <a href="#">Whitening Soaps</a>
+          <a href="#">Black Soaps</a>
+        </div>
+      </div>
+      <div>
+        <div class="f-title">About</div>
+        <div class="f-links">
+          <a href="#">Our Story</a>
+          <a href="#">Our Ingredients</a>
+          <a href="#">Skin Tips</a>
+          <a href="#">Wholesale</a>
+          <a href="#">Become a Distributor</a>
+        </div>
+      </div>
+      <div>
+        <div class="f-title">Help</div>
+        <div class="f-links">
+          <a href="#">Contact Us</a>
+          <a href="#">Shipping &amp; Returns</a>
+          <a href="#">FAQ</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Arikey Skincare. All rights reserved.</span>
+      <div class="pay-icons">
+        <span>Free shipping over ₦30,000</span>
+        <span>VISA</span><span>MC</span><span>PayPal</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+ var products = [
+  { 
+    id:1,
+    badge:"Bestseller",
+    cat:"Whitening Soap",
+    name:"5D Whitening Molato Soap (Small)",
+    rating:4,
+    count:427,
+    price:12000,
+    was:null,
+    image:"{% static 'images/molato-small.jpg' %}"
+  },
+
+  { 
+    id:2,
+    badge:"Most Popular",
+    cat:"Whitening Soap",
+    name:"5D Whitening Molato Soap (Medium)",
+    rating:4,
+    count:638,
+    price:17000,
+    was:null,
+    image:"{% static 'images/molato-medium.jpg' %}"
+  },
+
+  { 
+    id:3,
+    badge:"Best Value",
+    cat:"Whitening Soap",
+    name:"5D Whitening Molato Soap (Big)",
+    rating:4,
+    count:512,
+    price:28000,
+    was:32000,
+    image:"{% static 'images/molato-big.jpg' %}"
+  },
+
+  { 
+    id:4,
+    badge:"Healing",
+    cat:"Black Soap",
+    name:"5D Whitening Healing Black Soap (Small)",
+    rating:4,
+    count:389,
+    price:8500,
+    was:null,
+    image:"{% static 'images/healing-black-soap-small.jpg' %}"
+  }
+];
+
+  var testimonials = [
+    { text:"I have been using the 5D Whitening Molato Soap for three weeks and my skin is glowing like never before! My dark spots have faded so much and my complexion is so even now. Arikey Skincare is the real deal!", name:"Amara O.", loc:"Lagos, Nigeria", tag:"5D Whitening Molato Soap" },
+    { text:"The Healing Black Soap cleared my acne in just two weeks. I have tried everything from expensive creams to harsh treatments but nothing worked like this. My skin is smooth, clear, and the whitening effect is just a bonus!", name:"Sophie M.", loc:"Abuja, Nigeria", tag:"5D Whitening Healing Black Soap" },
+    { text:"I bought the big Molato soap for my whole family and we are all obsessed. My husband noticed his knuckles getting lighter in just one week. This is not a joke — Arikey products actually work!", name:"Chioma E.", loc:"Port Harcourt, Nigeria", tag:"5D Whitening Molato Soap (Big)" }
+  ];
+
+  function nairaFmt(n){
+    return "\u20A6" + n.toLocaleString("en-NG");
+  }
+  function starString(n){
+    var full = "\u2605".repeat(n);
+    var empty = "\u2606".repeat(5-n);
+    return full+empty;
+  }
+
+  var grid = document.getElementById("productGrid");
+  grid.innerHTML = products.map(function(p){
+    return (
+      '<div class="product-card reveal" tabindex="0" role="link" data-id="'+p.id+'" data-name="'+p.name+'">' +
+        '<div class="product-media">' +
+  '<span class="badge-tag">'+p.badge+'</span>' +
+  '<img src="'+p.image+'" alt="'+p.name+'" class="product-img">' +
+'</div>' +
+        '<div class="p-cat">'+p.cat+'</div>' +
+        '<div class="p-name">'+p.name+'</div>' +
+        '<div class="p-rating"><span class="stars">'+starString(p.rating)+'</span><span class="p-count">('+p.count+')</span></div>' +
+        '<div class="p-price">'+nairaFmt(p.price) + (p.was ? '<span class="was">'+nairaFmt(p.was)+'</span>' : '') + '</div>' +
+      '</div>'
+    );
+  }).join("");
+
+  grid.addEventListener("click", function(e){
+    var card = e.target.closest(".product-card");
+    if(!card) return;
+    window.location.href = "{% url 'product-details' %}?id=" + card.dataset.id;
+  });
+
+  grid.addEventListener("keydown", function(e){
+    var card = e.target.closest(".product-card");
+    if(!card) return;
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      window.location.href = "{% url 'product-details' %}?id=" + card.dataset.id;
+    }
+  });
+
+  var combos = [
+    { id:101, tag:"Skincare Routine", save:"Save \u20A611,000", name:"Face Set", image:"{% static 'images/face-set.png' %}", price:47000, was:58000, desc:"Face Soap \u00b7 Whitening Face Cream \u00b7 Face Serum +2 more" },
+    { id:102, tag:"Student Pick", save:"Save \u20A615,000", name:"Student Fair Set", image:"{% static 'images/student-fair.png' %}", price:57000, was:72000, desc:"5D Whitening Molato Soap (Small) \u00b7 Whitening Body Cream \u00b7 Face Soap +2 more" },
+    { id:103, tag:"Acne Care", save:"Save \u20A613,000", name:"Students Dark Set", image:"{% static 'images/students-dark.png' %}", price:55000, was:68000, desc:"5D Whitening Healing Black Soap (Small) \u00b7 Acne & Pimples Face Cream \u00b7 Face Toner +1 more" },
+    { id:104, tag:"Ultimate Bundle", save:"Save \u20A640,000", name:"Full Set", image:"{% static 'images/full-set.png' %}", price:145000, was:185000, desc:"5D Whitening Molato Soap (Big) \u00b7 Healing Black Soap (Big) \u00b7 Whitening Body Cream +5 more" }
+  ];
+  
+  var combos2 = [
+    { id:105, tag:"Indulgence", save:"Save \u20A620,000", name:"Hot Choco Set", image:"{% static 'images/hot-choco.jpg' %}", price:85000, was:105000, desc:"Hot Chocolate Body Cream \u00b7 Body Wash \u00b7 Body & Face Scrub +2 more" },
+    { id:106, tag:"Glow Bundle", save:"Save \u20A625,000", name:"Caramel Set", image:"{% static 'images/caramel-set.png' %}", price:100000, was:125000, desc:"Pure Glow Oil \u00b7 Whitening Body Cream \u00b7 Face Serum +2 more" },
+    { id:107, tag:"Travel Kit", save:"Save \u20A615,000", name:"Mini Set", image:"{% static 'images/mini-set.png' %}", price:80000, was:95000, desc:"5D Whitening Molato Soap (Small) \u00b7 Healing Black Soap (Small) \u00b7 Face Soap +2 more" }
+  ];
+
+  function renderCombos(list, elId){
+    document.getElementById(elId).innerHTML = list.map(function(c){
+      return (
+        '<a class="combo-card" href="{% url 'product-details' %}?id='+c.id+'">' +
+          '<div class="combo-media">' +
+            '<div class="combo-badge-row"><span class="combo-tag">'+c.tag+'</span><span class="combo-save">'+c.save+'</span></div>' +
+            '<img class="ph" src="' + c.image + '" alt="' + c.name + '" style="width:100%; height:100%; object-fit:cover;">'+
+          '</div>' +
+          '<div class="combo-eyebrow">Combo Deal</div>' +
+          '<div class="combo-name">'+c.name+'</div>' +
+          '<div class="combo-price">'+nairaFmt(c.price)+'<span class="was">'+nairaFmt(c.was)+'</span></div>' +
+          '<div class="combo-desc">'+c.desc+'</div>' +
+        '</a>'
+      );
+    }).join("");
+  }
+
+  renderCombos(combos, "comboGrid");
+  renderCombos(combos2, "comboGrid2");
+
+  var tGrid = document.getElementById("testimonialGrid");
+  tGrid.innerHTML = testimonials.map(function(t){
+    return (
+      '<div class="t-card reveal">' +
+        '<div>' +
+          '<div class="t-stars">' + "\u2605".repeat(5) + '</div>' +
+          '<p class="t-quote">\u201C'+t.text+'\u201D</p>' +
+        '</div>' +
+        '<div class="t-author">' +
+          '<div class="t-avatar"></div>' +
+          '<div><div class="t-name">'+t.name+'</div><div class="t-loc">'+t.loc+'</div></div>' +
+          '<div class="t-tag">'+t.tag+'</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
+
+  var cartCountEl = document.getElementById("cartCount");
+
+  function syncBagCount(){
+    try{
+      var bag = JSON.parse(localStorage.getItem("arikeyBag") || "[]");
+      var total = bag.reduce(function(sum,item){
+        return sum + (item.qty || 0);
+      }, 0);
+      cartCountEl.textContent = total;
+    }catch(e){
+      cartCountEl.textContent = "0";
+    }
+  }
+
+  syncBagCount();
+
+  var header = document.getElementById("siteHeader");
+  var hero = document.getElementById("home");
+  function onScroll(){
+    var scrolled = window.scrollY > 40;
+    header.classList.toggle("solid", scrolled);
+    var heroBottom = hero.offsetTop + hero.offsetHeight - 100;
+    header.classList.toggle("on-hero", window.scrollY < heroBottom && !scrolled);
+    if(scrolled){ header.classList.remove("on-hero"); }
+    else { header.classList.add("on-hero"); }
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  var menuToggle = document.getElementById("menuToggle");
+  var mobileMenu = document.getElementById("mobileMenu");
+  var mobileClose = document.getElementById("mobileClose");
+  function openMenu(){ mobileMenu.classList.add("open"); document.body.style.overflow="hidden"; }
+  function closeMenu(){ mobileMenu.classList.remove("open"); document.body.style.overflow=""; }
+  menuToggle.addEventListener("click", openMenu);
+  mobileClose.addEventListener("click", closeMenu);
+  mobileMenu.querySelectorAll("a").forEach(function(a){ a.addEventListener("click", closeMenu); });
+
+  var nlForm = document.getElementById("nlForm");
+  var nlSuccess = document.getElementById("nlSuccess");
+  nlForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = document.getElementById("nlEmail").value.trim();
+    if(!email) return;
+    nlSuccess.style.display = "block";
+    nlForm.reset();
+    setTimeout(function(){ nlSuccess.style.display = "none"; }, 5000);
+  });
+
+  var revealEls = document.querySelectorAll(".reveal");
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add("in");
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.15});
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add("in"); });
+  }
+
+
+  /* HERO: subtle premium parallax — disabled for touch/reduced-motion users */
+  var heroVisual = document.getElementById("heroVisual");
+  if(heroVisual && window.matchMedia("(pointer:fine)").matches &&
+     !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    heroVisual.addEventListener("mousemove", function(e){
+      var r = heroVisual.getBoundingClientRect();
+      var x = (e.clientX-r.left)/r.width-.5;
+      var y = (e.clientY-r.top)/r.height-.5;
+      heroVisual.querySelectorAll(".hero-product").forEach(function(el,i){
+        var depth=(i+1)*2.1;
+        el.style.marginLeft=(x*depth)+"px";
+        el.style.marginTop=(y*depth)+"px";
+      });
+    });
+    heroVisual.addEventListener("mouseleave", function(){
+      heroVisual.querySelectorAll(".hero-product").forEach(function(el){
+        el.style.marginLeft="0"; el.style.marginTop="0";
+      });
+    });
+  }
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+})();
+</script>
+</body>
+</html>

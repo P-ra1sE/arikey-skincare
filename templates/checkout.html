@@ -1,0 +1,1389 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Arikey Skincare</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#faf6ef;
+    --cream-2:#f3ede1;
+    --ink:#1c1410;
+    --ink-soft:#6c5d53;
+    --coral:#e64f5d;
+    --coral-dark:#c93f4d;
+    --line:rgba(28,20,16,.12);
+    --green:#1aa64a;
+    --error:#ff3434;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Jost',sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Playfair Display',serif;}
+  a{text-decoration:none;color:inherit;}
+  button,input,select{font:inherit;}
+  button{cursor:pointer;}
+  img{display:block;max-width:100%;}
+  .wrap{max-width:1220px;margin:0 auto;padding:0 40px;}
+
+  /* NAVBAR */
+  header{
+    position:sticky;top:0;z-index:100;height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+  .header-inner{
+    height:62px;display:flex;align-items:center;justify-content:space-between;
+    padding:8px 40px;max-width:1280px;margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:700;}
+  .brand-logo{width:38px;height:38px;object-fit:contain;flex:0 0 38px;}
+  nav.navlinks{display:flex;gap:38px;}
+  .navlink{
+    font-size:.8rem;letter-spacing:.1em;font-weight:500;text-transform:uppercase;
+    position:relative;padding-bottom:4px;
+  }
+  .navlink::after{
+    content:'';position:absolute;left:0;bottom:0;width:0;height:1px;
+    background:currentColor;transition:.3s ease;
+  }
+  .navlink:hover::after{width:100%;}
+  .cart-btn{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:34px;height:34px;color:var(--ink);
+  }
+  .cart-btn svg{width:19px;height:19px;stroke:currentColor;}
+  .cart-badge{
+    position:absolute;top:-2px;right:-2px;width:16px;height:16px;
+    border-radius:50%;background:var(--coral);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.62rem;font-weight:600;
+  }
+  .menu-toggle{display:none;width:24px;height:18px;position:relative;border:0;background:transparent;}
+  .menu-toggle span{position:absolute;left:0;width:100%;height:2px;background:var(--ink);}
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--ink);z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+    opacity:0;visibility:hidden;transform:translateY(-10px);transition:.3s ease;
+  }
+  .mobile-menu.open{opacity:1;visibility:visible;transform:none;}
+  .mobile-menu a{color:#fff;font-size:1.2rem;font-family:'Playfair Display',serif;}
+  .mobile-close{
+    position:absolute;top:24px;right:24px;border:0;background:transparent;
+    color:#fff;font-size:1.8rem;
+  }
+
+  /* PAGE HEAD */
+  .checkout-head{text-align:center;padding:34px 16px 24px;}
+  .checkout-head .eyebrow{
+    color:var(--coral);font-size:.68rem;letter-spacing:.2em;
+    text-transform:uppercase;font-weight:600;
+  }
+  .checkout-head h1{
+    font-size:clamp(2rem,4vw,3rem);font-weight:600;
+    margin:8px 0 7px;
+  }
+  .checkout-head p{
+    color:var(--ink-soft);font-size:.88rem;line-height:1.5;
+    max-width:580px;margin:0 auto;
+  }
+
+  /* CHECKOUT LAYOUT */
+  .checkout-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1.55fr) minmax(300px,.72fr);
+    gap:34px;
+    align-items:start;
+    padding:22px 0 54px;
+  }
+
+  .section-title{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Playfair Display',serif;
+    font-size:1.25rem;font-weight:600;
+    margin-bottom:16px;
+  }
+  .section-title svg{
+    width:19px;height:19px;stroke:var(--coral);flex:0 0 19px;
+  }
+
+  .form-section{margin-bottom:34px;}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;}
+  .field{min-width:0;}
+  .field.full{grid-column:1/-1;}
+  label{
+    display:block;font-size:.8rem;font-weight:500;margin-bottom:6px;
+  }
+  .req{color:var(--coral);}
+  input,select{
+    width:100%;height:46px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:6px;
+    padding:0 12px;
+    color:var(--ink);
+    outline:none;
+    font-size:.82rem;
+  }
+  input:focus,select:focus{
+    border-color:var(--coral);
+  }
+  .field.invalid input,.field.invalid select{
+    border-color:#ff7070;
+  }
+  .error{
+    display:none;
+    color:var(--error);
+    font-size:.67rem;
+    margin-top:4px;
+  }
+  .field.invalid .error{display:block;}
+
+  /* PAYMENT METHODS */
+  .pay-tabs{
+    display:flex;gap:10px;flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .pay-tab{
+    border:1px solid var(--line);
+    background:#fff;
+    min-height:46px;
+    padding:0 18px;
+    border-radius:6px;
+    display:flex;align-items:center;gap:8px;
+    color:var(--ink-soft);
+    font-size:.8rem;
+  }
+  .pay-tab.active{
+    border-color:#ff7b83;
+    background:#fff2f2;
+    color:#b72d39;
+  }
+  .pay-tab svg{width:18px;height:18px;stroke:currentColor;}
+
+  .payment-panel{
+    border:1px solid var(--line);
+    background:#fffaf3;
+    border-radius:8px;
+    padding:18px;
+  }
+  .payment-panel[hidden]{display:none;}
+  .card-grid{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:14px 18px;
+  }
+  .secure-note{
+    margin-top:12px;
+    display:flex;align-items:center;gap:8px;
+    color:var(--ink-soft);font-size:.7rem;
+  }
+  .secure-note svg{width:15px;height:15px;stroke:var(--green);}
+
+  .redirect-note{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:.8rem;
+    line-height:1.5;
+    padding:8px 6px;
+  }
+
+  /* ORDER SUMMARY */
+  .summary{
+    background:var(--cream-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px;
+    position:sticky;
+    top:82px;
+  }
+  .summary h2{font-size:1.25rem;margin-bottom:18px;}
+  .order-list{
+    display:flex;flex-direction:column;gap:12px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+  .order-item{
+    display:grid;
+    grid-template-columns:54px minmax(0,1fr) auto;
+    gap:10px;align-items:center;
+  }
+  .order-thumb{
+    width:54px;height:54px;border-radius:5px;overflow:hidden;background:#eee;
+  }
+  .order-thumb img{width:100%;height:100%;object-fit:cover;}
+  .order-name{
+    font-size:.76rem;font-weight:600;line-height:1.2;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .order-qty{font-size:.66rem;color:var(--ink-soft);margin-top:3px;}
+  .order-price{font-size:.75rem;font-weight:700;}
+  .summary-rows{padding-top:15px;}
+  .summary-row{
+    display:flex;justify-content:space-between;gap:14px;
+    margin-bottom:10px;font-size:.78rem;
+  }
+  .summary-row span:first-child{color:var(--ink-soft);}
+  .free{color:var(--green);font-weight:600;}
+  .summary-total{
+    display:flex;justify-content:space-between;
+    border-top:1px solid var(--line);
+    padding-top:14px;margin-top:13px;
+    font-family:'Playfair Display',serif;
+    font-size:1.05rem;font-weight:700;
+  }
+  .place-order{
+    width:100%;height:44px;margin-top:18px;
+    border:0;border-radius:6px;
+    background:var(--coral);color:#fff;
+    font-size:.78rem;font-weight:600;
+  }
+  .place-order:hover{background:var(--coral-dark);}
+  .terms{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:.65rem;
+    line-height:1.45;
+    margin-top:10px;
+  }
+  .order-status{
+    text-align:center;font-size:.68rem;margin-top:8px;min-height:16px;
+    color:var(--green);
+  }
+
+  /* FOOTER */
+  footer{background:#170f0c;color:rgba(255,255,255,.7);padding:40px 0 0;}
+  .footer-grid{
+    display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;
+    gap:26px;padding-bottom:28px;
+  }
+  .footer-logo{
+    font-family:'Playfair Display',serif;color:#fff;
+    font-size:1.15rem;font-weight:700;margin-bottom:10px;
+  }
+  .footer-desc{font-size:.76rem;line-height:1.55;max-width:320px;}
+  .f-title{
+    color:#fff;font-size:.66rem;letter-spacing:.14em;
+    text-transform:uppercase;font-weight:600;margin-bottom:11px;
+  }
+  .f-links{display:flex;flex-direction:column;gap:8px;}
+  .f-links a{font-size:.76rem;}
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,.1);
+    padding:15px 0;font-size:.7rem;color:rgba(255,255,255,.5);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+
+  /* MOBILE */
+  @media(max-width:860px){
+    .checkout-layout{grid-template-columns:1fr;}
+    .summary{position:static;order:-1;}
+  }
+
+  @media(max-width:720px){
+    .wrap{padding:0 16px;}
+    .header-inner{padding:8px 16px;}
+    nav.navlinks{display:none;}
+    .menu-toggle{display:block;}
+    .logo{font-size:1rem;gap:7px;}
+
+    .checkout-head{padding:22px 16px 14px;}
+    .checkout-head h1{font-size:1.8rem;}
+    .checkout-head p{font-size:.76rem;}
+
+    .checkout-layout{padding:10px 0 34px;gap:18px;}
+    .summary{padding:14px;}
+    .summary h2{font-size:1.05rem;margin-bottom:14px;}
+    .order-item{grid-template-columns:48px minmax(0,1fr) auto;}
+    .order-thumb{width:48px;height:48px;}
+    .order-name{font-size:.7rem;}
+    .order-price{font-size:.7rem;}
+    .section-title{font-size:1.05rem;margin-bottom:12px;}
+    .field-grid,.card-grid{grid-template-columns:1fr;gap:10px;}
+    .field.full{grid-column:auto;}
+    label{font-size:.74rem;}
+    input,select{height:42px;font-size:.76rem;padding:0 10px;}
+    .form-section{margin-bottom:26px;}
+    .pay-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+    .pay-tab{
+      min-height:42px;padding:0 8px;justify-content:center;
+      font-size:.68rem;
+    }
+    .pay-tab svg{width:15px;height:15px;}
+    .payment-panel{padding:14px;}
+    .redirect-note{font-size:.72rem;padding:4px;}
+    .summary-row{font-size:.72rem;}
+    .summary-total{font-size:.95rem;}
+    .place-order{height:40px;font-size:.72rem;}
+    .terms{font-size:.61rem;}
+    footer{padding-top:32px;}
+    .footer-grid{grid-template-columns:1fr;gap:18px;padding-bottom:22px;}
+  }
+
+  @media(max-width:390px){
+    .pay-tabs{grid-template-columns:1fr;}
+    .pay-tab{justify-content:flex-start;padding:0 14px;}
+  }
+
+  /* ==========================================================
+     ULTRA-COMPACT CHECKOUT
+     Smaller on desktop and especially compact on mobile.
+     ========================================================== */
+
+  .wrap{
+    max-width:1080px;
+  }
+
+  .checkout-head{
+    padding:22px 16px 14px;
+  }
+
+  .checkout-head .eyebrow{
+    font-size:.6rem;
+  }
+
+  .checkout-head h1{
+    font-size:clamp(1.7rem,3.2vw,2.35rem);
+    margin:5px 0 5px;
+  }
+
+  .checkout-head p{
+    font-size:.76rem;
+    max-width:500px;
+  }
+
+  .checkout-layout{
+    grid-template-columns:minmax(0,1.5fr) minmax(260px,.65fr);
+    gap:24px;
+    padding:14px 0 38px;
+  }
+
+  .form-section{
+    margin-bottom:24px;
+  }
+
+  .section-title{
+    gap:7px;
+    font-size:1.05rem;
+    margin-bottom:11px;
+  }
+
+  .section-title svg{
+    width:16px;
+    height:16px;
+    flex-basis:16px;
+  }
+
+  .field-grid{
+    gap:9px 12px;
+  }
+
+  label{
+    font-size:.72rem;
+    margin-bottom:4px;
+  }
+
+  input,
+  select{
+    height:38px;
+    padding:0 10px;
+    font-size:.74rem;
+    border-radius:5px;
+  }
+
+  .error{
+    font-size:.6rem;
+    margin-top:3px;
+  }
+
+  .pay-tabs{
+    gap:7px;
+    margin-bottom:11px;
+  }
+
+  .pay-tab{
+    min-height:40px;
+    padding:0 13px;
+    font-size:.72rem;
+    gap:6px;
+  }
+
+  .pay-tab svg{
+    width:15px;
+    height:15px;
+  }
+
+  .payment-panel{
+    padding:13px;
+    border-radius:6px;
+  }
+
+  .card-grid{
+    gap:9px 12px;
+  }
+
+  .secure-note{
+    margin-top:9px;
+    gap:6px;
+    font-size:.62rem;
+  }
+
+  .secure-note svg{
+    width:13px;
+    height:13px;
+  }
+
+  .redirect-note{
+    font-size:.7rem;
+    padding:4px;
+  }
+
+  .summary{
+    padding:15px;
+    border-radius:7px;
+    top:74px;
+  }
+
+  .summary h2{
+    font-size:1.05rem;
+    margin-bottom:12px;
+  }
+
+  .order-list{
+    gap:8px;
+    padding-bottom:11px;
+  }
+
+  .order-item{
+    grid-template-columns:44px minmax(0,1fr) auto;
+    gap:8px;
+  }
+
+  .order-thumb{
+    width:44px;
+    height:44px;
+  }
+
+  .order-name{
+    font-size:.68rem;
+  }
+
+  .order-qty{
+    font-size:.58rem;
+    margin-top:2px;
+  }
+
+  .order-price{
+    font-size:.66rem;
+  }
+
+  .summary-rows{
+    padding-top:11px;
+  }
+
+  .summary-row{
+    margin-bottom:8px;
+    font-size:.7rem;
+  }
+
+  .summary-total{
+    padding-top:10px;
+    margin-top:9px;
+    font-size:.92rem;
+  }
+
+  .place-order{
+    height:39px;
+    margin-top:13px;
+    font-size:.69rem;
+  }
+
+  .terms{
+    font-size:.57rem;
+    margin-top:7px;
+  }
+
+  .order-status{
+    font-size:.6rem;
+    margin-top:6px;
+  }
+
+  footer{
+    padding-top:30px;
+  }
+
+  .footer-grid{
+    gap:20px;
+    padding-bottom:22px;
+  }
+
+  .footer-logo{
+    font-size:1.02rem;
+    margin-bottom:7px;
+  }
+
+  .footer-desc,
+  .f-links a{
+    font-size:.68rem;
+  }
+
+  .f-title{
+    font-size:.6rem;
+    margin-bottom:8px;
+  }
+
+  .footer-bottom{
+    padding:12px 0;
+    font-size:.62rem;
+  }
+
+  /* ---------- COMPACT TABLETS ---------- */
+  @media(max-width:860px){
+    .wrap{
+      max-width:680px;
+    }
+
+    .checkout-layout{
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+
+    .summary{
+      position:static;
+      order:-1;
+    }
+  }
+
+  /* ---------- VERY COMPACT MOBILE ---------- */
+  @media(max-width:720px){
+    .wrap{
+      padding:0 12px;
+    }
+
+    .header-inner{
+      padding:8px 12px;
+    }
+
+    .checkout-head{
+      padding:16px 12px 10px;
+    }
+
+    .checkout-head .eyebrow{
+      font-size:.54rem;
+    }
+
+    .checkout-head h1{
+      font-size:1.5rem;
+      margin:4px 0;
+    }
+
+    .checkout-head p{
+      font-size:.68rem;
+      line-height:1.4;
+      max-width:340px;
+    }
+
+    .checkout-layout{
+      padding:7px 0 24px;
+      gap:12px;
+    }
+
+    .summary{
+      padding:11px;
+    }
+
+    .summary h2{
+      font-size:.92rem;
+      margin-bottom:9px;
+    }
+
+    .order-list{
+      gap:7px;
+      padding-bottom:9px;
+    }
+
+    .order-item{
+      grid-template-columns:38px minmax(0,1fr) auto;
+      gap:7px;
+    }
+
+    .order-thumb{
+      width:38px;
+      height:38px;
+    }
+
+    .order-name{
+      font-size:.62rem;
+    }
+
+    .order-qty{
+      font-size:.54rem;
+    }
+
+    .order-price{
+      font-size:.61rem;
+    }
+
+    .summary-rows{
+      padding-top:9px;
+    }
+
+    .summary-row{
+      font-size:.64rem;
+      margin-bottom:6px;
+    }
+
+    .summary-total{
+      font-size:.84rem;
+      padding-top:9px;
+      margin-top:7px;
+    }
+
+    .place-order{
+      height:37px;
+      margin-top:11px;
+      font-size:.65rem;
+    }
+
+    .terms{
+      font-size:.54rem;
+      line-height:1.35;
+    }
+
+    .form-section{
+      margin-bottom:19px;
+    }
+
+    .section-title{
+      font-size:.91rem;
+      margin-bottom:9px;
+    }
+
+    .section-title svg{
+      width:14px;
+      height:14px;
+      flex-basis:14px;
+    }
+
+    .field-grid,
+    .card-grid{
+      gap:7px;
+    }
+
+    label{
+      font-size:.66rem;
+      margin-bottom:3px;
+    }
+
+    input,
+    select{
+      height:36px;
+      padding:0 9px;
+      font-size:.69rem;
+    }
+
+    .error{
+      font-size:.56rem;
+      margin-top:2px;
+    }
+
+    .pay-tabs{
+      gap:6px;
+      margin-bottom:9px;
+    }
+
+    .pay-tab{
+      min-height:37px;
+      padding:0 7px;
+      font-size:.62rem;
+      gap:5px;
+    }
+
+    .pay-tab svg{
+      width:13px;
+      height:13px;
+    }
+
+    .payment-panel{
+      padding:10px;
+    }
+
+    .secure-note{
+      font-size:.56rem;
+      margin-top:7px;
+    }
+
+    .redirect-note{
+      font-size:.64rem;
+      line-height:1.4;
+    }
+
+    footer{
+      padding-top:26px;
+    }
+
+    .footer-grid{
+      gap:15px;
+      padding-bottom:18px;
+    }
+
+    .footer-desc,
+    .f-links a{
+      font-size:.63rem;
+    }
+
+    .footer-bottom{
+      padding:10px 0;
+      font-size:.57rem;
+    }
+  }
+
+  /* Keep three payment choices compact on normal phones */
+  @media(min-width:391px) and (max-width:720px){
+    .pay-tabs{
+      grid-template-columns:repeat(3,1fr);
+    }
+  }
+
+  /* Narrow phones */
+  @media(max-width:390px){
+    .checkout-head h1{
+      font-size:1.4rem;
+    }
+
+    .pay-tabs{
+      grid-template-columns:1fr;
+    }
+
+    .pay-tab{
+      min-height:36px;
+      justify-content:flex-start;
+      padding:0 11px;
+    }
+
+    .field-grid,
+    .card-grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="{% url 'home-page' %}" class="logo" aria-label="Arikey Skincare Home">
+      <img src="{% static 'images/logo.png' %}" alt="Arikey Skincare logo" class="brand-logo">
+      <span>Arikey Skincare</span>
+    </a>
+
+    <nav class="navlinks">
+      <a class="navlink" href="{% url 'home-page' %}">Home</a>
+      <a class="navlink" href="{% url 'shop' %}">Shop</a>
+      <a class="navlink" href="{% url 'our-story' %}">Our Story</a>
+      <a class="navlink" href="{% url 'contact' %}">Contact</a>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a class="cart-btn" href="{% url 'cart' %}" aria-label="Shopping bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+        <span class="cart-badge" id="cartCount">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose" aria-label="Close menu">&times;</button>
+  <a href="{% url 'home-page' %}">Home</a>
+  <a href="{% url 'shop' %}">Shop</a>
+  <a href="{% url 'our-story' %}">Our Story</a>
+  <a href="{% url 'contact' %}">Contact</a>
+</div>
+
+<main>
+  <section class="checkout-head">
+    <div class="eyebrow">Secure Checkout</div>
+    <h1>Complete Your Order</h1>
+    <p>Your information is encrypted and secure. We never store your payment details.</p>
+  </section>
+
+  <section class="wrap">
+    <div class="checkout-layout">
+
+      <form id="checkoutForm" novalidate>
+        {% csrf_token %}
+        <div class="form-section">
+          <div class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Shipping Information
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="firstName">First Name <span class="req">*</span></label>
+              <input id="firstName" name="firstName" placeholder="Ada" required>
+              <div class="error">First name is required</div>
+            </div>
+
+            <div class="field">
+              <label for="lastName">Last Name <span class="req">*</span></label>
+              <input id="lastName" name="lastName" placeholder="Obi" required>
+              <div class="error">Last name is required</div>
+            </div>
+
+            <div class="field full">
+              <label for="email">Email Address <span class="req">*</span></label>
+              <input id="email" name="email" type="email" placeholder="ada@email.com" required>
+              <div class="error">Enter a valid email address</div>
+            </div>
+
+            <div class="field full">
+              <label for="address">Address <span class="req">*</span></label>
+              <input id="address" name="address" placeholder="123 Victoria Island Boulevard" required>
+              <div class="error">Address is required</div>
+            </div>
+
+            <div class="field">
+              <label for="city">City <span class="req">*</span></label>
+              <input id="city" name="city" placeholder="Lagos" required>
+              <div class="error">City is required</div>
+            </div>
+
+            <div class="field">
+              <label for="state">State / Province <span class="req">*</span></label>
+              <input id="state" name="state" placeholder="Lagos State" required>
+              <div class="error">State is required</div>
+            </div>
+
+            <div class="field">
+              <label for="zip">ZIP / Postal Code <span class="req">*</span></label>
+              <input id="zip" name="zip" placeholder="100001" required>
+              <div class="error">ZIP code is required</div>
+            </div>
+
+            <div class="field">
+              <label for="country">Country <span class="req">*</span></label>
+              <select id="country" name="country" required>
+                <option value="">Select country</option>
+                <option value="Nigeria">Nigeria</option>
+                <option value="Ghana">Ghana</option>
+                <option value="Kenya">Kenya</option>
+                <option value="South Africa">South Africa</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="error">Country is required</div>
+            </div>
+          </div>
+        </div>
+
+      <div class="form-section">
+
+  <div class="section-title">
+    <svg viewBox="0 0 24 24"
+         fill="none"
+         stroke-width="1.8">
+      <rect x="3"
+            y="5"
+            width="18"
+            height="14"
+            rx="2"/>
+      <path d="M3 9h18"/>
+      <path d="M7 14h4"/>
+    </svg>
+
+    How Would You Like to Order?
+  </div>
+
+
+  <div class="pay-tabs">
+
+    <button
+      type="button"
+      class="pay-tab active"
+      data-method="paystack">
+
+      <svg viewBox="0 0 24 24"
+           fill="none"
+           stroke-width="1.8">
+
+        <rect x="3"
+              y="5"
+              width="18"
+              height="14"
+              rx="2"/>
+
+        <path d="M3 9h18"/>
+        <path d="M7 14h4"/>
+
+      </svg>
+
+      Pay Online
+    </button>
+
+
+    <button
+      type="button"
+      class="pay-tab"
+      data-method="whatsapp">
+
+      <svg viewBox="0 0 24 24"
+           fill="none"
+           stroke-width="1.8">
+
+        <path
+          d="M20 11.5a8 8 0 0 1-11.8 7
+             L4 20l1.5-4A8 8 0 1 1 20 11.5z"/>
+
+      </svg>
+
+      Order via WhatsApp
+    </button>
+
+  </div>
+
+
+  <div
+    class="payment-panel"
+    id="paystackPanel">
+
+    <div class="redirect-note">
+
+      Pay securely online.
+      You will be redirected to our secure
+      payment page after placing your order.
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="payment-panel"
+    id="whatsappPanel"
+    hidden>
+
+    <div class="redirect-note">
+
+      Your order will be saved first,
+      then WhatsApp will open with your
+      order details ready to send.
+
+    </div>
+
+  </div>
+
+</div>
+      </form>
+
+      <aside class="summary">
+        <h2>Your Order</h2>
+        <div class="order-list" id="orderList"></div>
+
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <strong id="subtotal">₦0</strong>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <strong id="shipping">₦0</strong>
+          </div>
+
+          <div class="summary-total">
+            <span>Total</span>
+            <span id="total">₦0</span>
+          </div>
+
+          <button class="place-order" type="button" id="placeOrder">🔒 Place Order — ₦0</button>
+          <div class="terms">By placing your order, you agree to our Terms and Privacy Policy.</div>
+          <div class="order-status" id="orderStatus"></div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Arikey Skincare</div>
+        <p class="footer-desc">Premium skincare crafted for radiant-looking, well-cared-for skin.</p>
+      </div>
+      <div>
+        <div class="f-title">Shop</div>
+        <div class="f-links"><a href="{% url 'shop' %}">All Products</a><a href="{% url 'shop' %}">Whitening Soaps</a><a href="{% url 'shop' %}">Black Soaps</a></div>
+      </div>
+      <div>
+        <div class="f-title">About</div>
+        <div class="f-links"><a href="{% url 'our-story' %}">Our Story</a><a href="#">Our Ingredients</a><a href="#">Skin Tips</a></div>
+      </div>
+      <div>
+        <div class="f-title">Help</div>
+        <div class="f-links"><a href="{% url 'contact' %}">Contact Us</a><a href="#">Shipping &amp; Returns</a><a href="#">FAQ</a></div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Arikey Skincare. All rights reserved.</span>
+      <span>Secure checkout</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var SHIPPING_FEE = 2500;
+  var FREE_SHIPPING_MIN = 30000;
+  var orderMethod = "paystack";
+
+  function naira(n){
+    return "₦" + Number(n).toLocaleString("en-NG");
+  }
+
+  function getBag(){
+    try{
+      return JSON.parse(localStorage.getItem("arikeyBag") || "[]");
+    }catch(e){
+      return [];
+    }
+  }
+
+  var bag = getBag().filter(function(item){
+    return item && item.id && item.qty > 0;
+  });
+
+  var orderList = document.getElementById("orderList");
+  var cartCount = document.getElementById("cartCount");
+  var subtotalEl = document.getElementById("subtotal");
+  var shippingEl = document.getElementById("shipping");
+  var totalEl = document.getElementById("total");
+  var placeOrder = document.getElementById("placeOrder");
+  var orderStatus = document.getElementById("orderStatus");
+
+  function renderOrder(){
+    var itemCount = bag.reduce(function(sum,item){ return sum + item.qty; },0);
+    var subtotal = bag.reduce(function(sum,item){ return sum + (item.price * item.qty); },0);
+    var shipping = itemCount === 0 ? 0 : (subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING_FEE);
+    var total = subtotal + shipping;
+
+    cartCount.textContent = itemCount;
+
+    if(itemCount === 0){
+      orderList.innerHTML = '<p style="font-size:.74rem;color:var(--ink-soft);">Your bag is empty. <a href="{% url 'shop' %}" style="color:var(--coral);">Continue shopping</a>.</p>';
+      placeOrder.disabled = true;
+      placeOrder.style.opacity = ".5";
+    }else{
+      orderList.innerHTML = bag.map(function(item){
+        return '<div class="order-item">' +
+          '<div class="order-thumb"><img src="'+item.image+'" alt="'+item.name+'"></div>' +
+          '<div>' +
+            '<div class="order-name">'+item.name+'</div>' +
+            '<div class="order-qty">Qty: '+item.qty+'</div>' +
+          '</div>' +
+          '<div class="order-price">'+naira(item.price * item.qty)+'</div>' +
+        '</div>';
+      }).join("");
+    }
+
+    subtotalEl.textContent = naira(subtotal);
+    shippingEl.textContent = shipping === 0 && itemCount > 0 ? "Free" : naira(shipping);
+    if(shipping === 0 && itemCount > 0) shippingEl.classList.add("free");
+    totalEl.textContent = naira(total);
+    placeOrder.textContent = "🔒 Place Order — " + naira(total);
+  }
+
+  function setOrderMethod(method){
+
+    orderMethod = method;
+
+    document
+      .querySelectorAll(".pay-tab")
+      .forEach(function(btn){
+
+        btn.classList.toggle(
+          "active",
+          btn.dataset.method === method
+        );
+
+      });
+
+
+    document.getElementById(
+      "paystackPanel"
+    ).hidden = method !== "paystack";
+
+
+    document.getElementById(
+      "whatsappPanel"
+    ).hidden = method !== "whatsapp";
+}
+
+
+document
+  .querySelectorAll(".pay-tab")
+  .forEach(function(btn){
+
+    btn.addEventListener(
+      "click",
+      function(){
+
+        setOrderMethod(
+          btn.dataset.method
+        );
+
+      }
+    );
+
+  });
+
+  function markField(el, valid){
+    var field = el.closest(".field");
+    if(!field) return;
+    field.classList.toggle("invalid", !valid);
+  }
+
+  function validateShipping(){
+    var ids = ["firstName","lastName","email","address","city","state","zip","country"];
+    var allGood = true;
+
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      var valid = el.value.trim() !== "";
+      if(id === "email"){
+        valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+      }
+      markField(el, valid);
+      if(!valid) allGood = false;
+    });
+
+    return allGood;
+  }
+
+
+  placeOrder.addEventListener("click", async function(){
+
+    if(!bag.length){
+        orderStatus.style.color = "var(--error)";
+        orderStatus.textContent = "Your shopping bag is empty.";
+        return;
+    }
+
+    var shippingOk = validateShipping();
+
+    if(!shippingOk){
+        orderStatus.style.color = "var(--error)";
+        orderStatus.textContent =
+            "Please complete your shipping information.";
+        return;
+    }
+
+    var csrfToken = document.querySelector(
+        "[name=csrfmiddlewaretoken]"
+    ).value;
+
+    var orderData = {
+
+        first_name:
+            document.getElementById("firstName").value.trim(),
+
+        last_name:
+            document.getElementById("lastName").value.trim(),
+
+        email:
+            document.getElementById("email").value.trim(),
+
+        address:
+            document.getElementById("address").value.trim(),
+
+        city:
+            document.getElementById("city").value.trim(),
+
+        state:
+            document.getElementById("state").value.trim(),
+
+        zip:
+            document.getElementById("zip").value.trim(),
+
+        country:
+            document.getElementById("country").value,
+
+        order_method: orderMethod,
+
+        items: bag.map(function(item){
+            return {
+                id: item.id,
+                quantity: item.qty
+            };
+        })
+    };
+
+    placeOrder.disabled = true;
+
+    placeOrder.textContent =
+        "Creating Order...";
+
+    orderStatus.style.color =
+        "var(--ink-soft)";
+
+    orderStatus.textContent =
+        "Please wait...";
+
+    try{
+
+        var response = await fetch(
+            "{% url 'create-order' %}",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "X-CSRFToken":
+                        csrfToken
+                },
+
+                body:
+                    JSON.stringify(orderData)
+            }
+        );
+
+        var data = await response.json();
+
+        if(!response.ok || !data.success){
+
+            throw new Error(
+                data.error ||
+                "Unable to create your order."
+            );
+        }
+
+        if(data.order_method === "whatsapp"){
+
+    if(!data.whatsapp_url){
+
+        throw new Error(
+            "WhatsApp ordering is not configured yet."
+        );
+
+    }
+
+    orderStatus.style.color =
+        "var(--green)";
+
+    orderStatus.textContent =
+        "Order saved. Opening WhatsApp...";
+
+    placeOrder.textContent =
+        "Opening WhatsApp...";
+
+
+    setTimeout(function(){
+
+        window.location.href =
+            data.whatsapp_url;
+
+    }, 600);
+
+}
+else{
+
+    if(!data.authorization_url){
+
+        throw new Error(
+            "Payment link was not received."
+        );
+
+    }
+
+    orderStatus.style.color =
+        "var(--green)";
+
+    orderStatus.textContent =
+        "Opening secure payment...";
+
+    placeOrder.textContent =
+        "Opening Paystack...";
+
+
+    setTimeout(function(){
+
+        window.location.href =
+            data.authorization_url;
+
+    }, 500);
+
+}
+
+        /*
+        Do NOT clear localStorage here.
+
+        We will only clear the cart after
+        successful payment later.
+        */
+
+    }catch(error){
+
+        orderStatus.style.color =
+            "var(--error)";
+
+        orderStatus.textContent =
+            error.message;
+
+        placeOrder.disabled = false;
+
+        renderOrder();
+    }
+
+});
+
+  var menuToggle = document.getElementById("menuToggle");
+  var mobileMenu = document.getElementById("mobileMenu");
+  var mobileClose = document.getElementById("mobileClose");
+
+  menuToggle.addEventListener("click", function(){
+    mobileMenu.classList.add("open");
+    document.body.style.overflow = "hidden";
+  });
+
+  mobileClose.addEventListener("click", function(){
+    mobileMenu.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+
+  mobileMenu.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", function(){
+      mobileMenu.classList.remove("open");
+      document.body.style.overflow = "";
+    });
+  });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+  renderOrder();
+})();
+</script>
+
+</body>
+</html>

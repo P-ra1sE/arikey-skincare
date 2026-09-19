@@ -1,0 +1,1350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details — Arikey Skincare</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf6ef;
+    --cream-2:#f3ede1;
+    --ink:#1c1410;
+    --ink-soft:#6c5d53;
+    --coral:#d1495b;
+    --coral-dark:#b83a4b;
+    --gold:#c98a00;
+    --amber:#c68a1f;
+    --line:rgba(28,20,16,.11);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Jost',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 40px;}
+  .eyebrow{letter-spacing:.18em;font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--coral);}
+
+  /* ---------- NAVBAR ---------- */
+  header{
+    position:sticky;top:0;z-index:100;height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+  .header-inner{
+    height:62px;display:flex;align-items:center;justify-content:space-between;
+    padding:8px 40px;max-width:1280px;margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:700;letter-spacing:.01em;}
+  .brand-logo{width:38px;height:38px;object-fit:contain;display:block;flex:0 0 38px;}
+  nav.navlinks{display:flex;gap:38px;}
+  .navlink{
+    font-size:.8rem;letter-spacing:.1em;font-weight:500;text-transform:uppercase;
+    position:relative;padding-bottom:4px;color:var(--ink);
+  }
+  .navlink.active{color:var(--coral);}
+  .navlink::after{content:'';position:absolute;left:0;bottom:0;width:0;height:1px;background:currentColor;transition:width .3s ease;}
+  .navlink:hover::after{width:100%;}
+  .cart-btn{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:34px;height:34px;color:var(--ink);border:none;background:transparent;padding:0;
+  }
+  .cart-btn svg{width:19px;height:19px;stroke:currentColor;}
+  .cart-badge{
+    position:absolute;top:-2px;right:-2px;background:var(--coral);color:#fff;
+    font-size:.62rem;font-weight:600;width:16px;height:16px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .menu-toggle{display:none;width:24px;height:18px;position:relative;border:0;background:transparent;color:var(--ink);}
+  .menu-toggle span{position:absolute;left:0;width:100%;height:2px;background:currentColor;transition:.3s;}
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--ink);z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+    opacity:0;visibility:hidden;transform:translateY(-12px);transition:.3s ease;
+  }
+  .mobile-menu.open{opacity:1;visibility:visible;transform:translateY(0);}
+  .mobile-menu a{color:#fff;font-size:1.3rem;font-family:'Playfair Display',serif;}
+  .mobile-close{
+    position:absolute;top:28px;right:32px;color:#fff;font-size:1.8rem;
+    width:30px;height:30px;border:0;background:transparent;
+  }
+
+  /* ---------- PRODUCT DETAIL ---------- */
+  .product-detail{padding:42px 0 54px;}
+  .detail-grid{
+    display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);
+    gap:56px;align-items:start;
+  }
+  .main-media{
+    position:sticky;top:88px;
+    background:var(--cream-2);border-radius:8px;overflow:hidden;
+    aspect-ratio:1/1;min-height:520px;
+  }
+  .main-media img{width:100%;height:100%;object-fit:cover;object-position:center;}
+  .image-fallback{
+    display:none;position:absolute;inset:0;align-items:center;justify-content:center;
+    text-align:center;color:var(--ink-soft);padding:30px;
+  }
+
+  .detail-copy{padding-top:2px;}
+  .badge{
+    display:inline-flex;align-items:center;background:var(--coral);color:#fff;
+    border-radius:30px;padding:6px 13px;font-size:.7rem;font-weight:600;
+    margin-bottom:18px;
+  }
+  .detail-cat{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .detail-title{font-size:clamp(2rem,3.7vw,3rem);font-weight:600;line-height:1.08;margin-bottom:12px;}
+  .rating-row{display:flex;align-items:center;gap:9px;margin-bottom:24px;}
+  .stars{color:var(--gold);letter-spacing:1px;font-size:1rem;}
+  .rating-text{font-size:.84rem;color:var(--ink-soft);}
+  .price-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:24px;}
+  .price{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;}
+  .old-price{font-size:1rem;color:#9b8e86;text-decoration:line-through;}
+  .save{font-size:.83rem;color:#b87300;font-weight:600;}
+  .description{font-size:.98rem;line-height:1.72;color:var(--ink-soft);margin-bottom:24px;max-width:620px;}
+
+  .best-for{margin-bottom:26px;}
+  .best-for h3{font-family:'Jost',sans-serif;font-size:.9rem;margin-bottom:10px;}
+  .tag-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .tag{border:1px solid var(--line);background:#fffaf3;border-radius:30px;padding:8px 13px;font-size:.75rem;color:var(--ink-soft);}
+
+  .purchase-row{
+    display:grid;grid-template-columns:150px 1fr;gap:16px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:24px 0;
+  }
+  .qty{
+    height:54px;border:1px solid var(--line);border-radius:6px;
+    display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;background:#fffaf3;
+  }
+  .qty button{
+    border:0;background:transparent;font-size:1.15rem;color:var(--ink-soft);height:100%;
+  }
+  .qty span{text-align:center;font-weight:600;}
+  .add-btn{
+    height:54px;border:none;border-radius:6px;background:var(--coral);color:#fff;
+    font-weight:600;font-size:.9rem;letter-spacing:.01em;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:.25s ease;
+  }
+  .add-btn:hover{background:var(--coral-dark);transform:translateY(-1px);}
+  .add-btn svg{width:17px;height:17px;stroke:currentColor;}
+  .add-note{font-size:.78rem;color:var(--ink-soft);margin-top:10px;min-height:20px;}
+
+  .inside{padding:26px 0 20px;}
+  .inside h3{font-size:1.1rem;margin-bottom:14px;}
+  .inside-list{list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .inside-list li{font-size:.86rem;color:var(--ink-soft);display:flex;gap:10px;align-items:flex-start;}
+  .check{color:#c98a00;font-weight:700;line-height:1.3;}
+
+  .benefit-row{
+    border-top:1px solid var(--line);
+    display:flex;gap:22px;flex-wrap:wrap;padding-top:22px;
+  }
+  .benefit{
+    display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--ink-soft);
+  }
+  .benefit svg{width:18px;height:18px;stroke:#c98a00;flex:0 0 18px;}
+
+  /* ---------- RELATED ---------- */
+  .related{padding:52px 0 72px;background:var(--cream);}
+  .related-head{text-align:center;margin-bottom:36px;}
+  .related-head h2{font-size:clamp(1.8rem,3.6vw,2.5rem);font-weight:600;margin-top:8px;}
+  .related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;}
+  .related-card{cursor:pointer;}
+  .related-media{
+    position:relative;aspect-ratio:1/1;border-radius:7px;overflow:hidden;
+    background:var(--cream-2);margin-bottom:14px;
+  }
+  .related-media img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
+  .related-card:hover .related-media img{transform:scale(1.035);}
+  .related-badge{
+    position:absolute;top:10px;left:10px;z-index:2;background:var(--coral);
+    color:#fff;border-radius:30px;padding:5px 10px;font-size:.65rem;font-weight:600;
+  }
+  .related-cat{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;}
+  .related-name{font-family:'Playfair Display',serif;font-weight:600;font-size:1rem;margin-bottom:6px;line-height:1.3;}
+  .related-price{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:#170f0c;color:rgba(255,255,255,.7);padding:56px 0 0;}
+  .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:34px;padding-bottom:40px;}
+  .footer-logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:16px;}
+  .footer-desc{font-size:.9rem;line-height:1.7;margin-bottom:22px;max-width:340px;}
+  .socials{display:flex;gap:12px;}
+  .social-ic{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;}
+  .social-ic svg{width:15px;height:15px;fill:#fff;}
+  .f-title{color:#fff;font-size:.76rem;letter-spacing:.14em;font-weight:600;text-transform:uppercase;margin-bottom:18px;}
+  .f-links{display:flex;flex-direction:column;gap:11px;}
+  .f-links a{font-size:.88rem;}
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,.1);padding:20px 0;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+    font-size:.8rem;color:rgba(255,255,255,.5);
+  }
+  .pay-icons{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pay-icons span{border:1px solid rgba(255,255,255,.2);padding:4px 8px;border-radius:3px;font-size:.66rem;font-weight:600;}
+
+  @media(max-width:980px){
+    .detail-grid{grid-template-columns:1fr;gap:30px;}
+    .main-media{position:relative;top:auto;min-height:0;aspect-ratio:4/3;}
+    .related-grid{grid-template-columns:repeat(2,1fr);}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:720px){
+    nav.navlinks{display:none;}
+    .menu-toggle{display:block;}
+    .wrap{padding:0 22px;}
+    .header-inner{height:62px;padding:8px 22px;}
+    .product-detail{padding:26px 0 42px;}
+    .detail-title{font-size:2rem;}
+    .purchase-row{grid-template-columns:120px 1fr;gap:10px;}
+    .main-media{aspect-ratio:1/1;}
+    .related{padding:42px 0 56px;}
+    .related-grid{grid-template-columns:1fr 1fr;gap:16px;}
+    .footer-grid{grid-template-columns:1fr;}
+    .footer-bottom{flex-direction:column;align-items:flex-start;}
+  }
+  @media(max-width:480px){
+    .purchase-row{grid-template-columns:1fr;}
+    .qty{max-width:180px;}
+    .related-grid{grid-template-columns:1fr;}
+  }
+
+  /* ==========================================================
+     EXTRA COMPACT / MOBILE-FIRST PRODUCT PAGE
+     ========================================================== */
+
+  .product-detail{
+    padding:24px 0 34px;
+  }
+
+  .detail-grid{
+    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
+    gap:30px;
+    max-width:1080px;
+    margin:0 auto;
+  }
+
+  .main-media{
+    position:sticky;
+    top:78px;
+    min-height:0;
+    aspect-ratio:1/1;
+    max-width:410px;
+    width:100%;
+    justify-self:end;
+    border-radius:6px;
+  }
+
+  .detail-copy{
+    padding-top:0;
+    max-width:520px;
+  }
+
+  .badge{
+    padding:4px 10px;
+    font-size:.62rem;
+    margin-bottom:10px;
+  }
+
+  .detail-cat{
+    font-size:.65rem;
+    margin-bottom:5px;
+  }
+
+  .detail-title{
+    font-size:clamp(1.55rem,2.8vw,2.15rem);
+    line-height:1.05;
+    margin-bottom:8px;
+  }
+
+  .rating-row{
+    gap:6px;
+    margin-bottom:14px;
+  }
+
+  .stars{
+    font-size:.82rem;
+  }
+
+  .rating-text{
+    font-size:.72rem;
+  }
+
+  .price-row{
+    gap:9px;
+    margin-bottom:14px;
+  }
+
+  .price{
+    font-size:1.35rem;
+  }
+
+  .old-price{
+    font-size:.82rem;
+  }
+
+  .save{
+    font-size:.72rem;
+  }
+
+  .description{
+    font-size:.82rem;
+    line-height:1.5;
+    margin-bottom:14px;
+    max-width:500px;
+  }
+
+  .best-for{
+    margin-bottom:14px;
+  }
+
+  .best-for h3{
+    font-size:.78rem;
+    margin-bottom:7px;
+  }
+
+  .tag-row{
+    gap:6px;
+  }
+
+  .tag{
+    padding:5px 9px;
+    font-size:.66rem;
+  }
+
+  .purchase-row{
+    grid-template-columns:112px 1fr;
+    gap:10px;
+    padding:14px 0;
+  }
+
+  .qty{
+    height:42px;
+  }
+
+  .qty button{
+    font-size:.95rem;
+  }
+
+  .qty span{
+    font-size:.82rem;
+  }
+
+  .add-btn{
+    height:42px;
+    font-size:.76rem;
+    gap:7px;
+  }
+
+  .add-btn svg{
+    width:14px;
+    height:14px;
+  }
+
+  .add-note{
+    font-size:.7rem;
+    margin-top:6px;
+    min-height:16px;
+  }
+
+  .inside{
+    padding:15px 0 12px;
+  }
+
+  .inside h3{
+    font-size:.95rem;
+    margin-bottom:9px;
+  }
+
+  .inside-list{
+    gap:6px;
+  }
+
+  .inside-list li{
+    font-size:.74rem;
+    gap:7px;
+  }
+
+  .benefit-row{
+    gap:12px 18px;
+    padding-top:14px;
+  }
+
+  .benefit{
+    gap:6px;
+    font-size:.68rem;
+  }
+
+  .benefit svg{
+    width:15px;
+    height:15px;
+    flex-basis:15px;
+  }
+
+  .related{
+    padding:36px 0 48px;
+  }
+
+  .related-head{
+    margin-bottom:24px;
+  }
+
+  .related-head h2{
+    font-size:clamp(1.45rem,3vw,1.9rem);
+    margin-top:5px;
+  }
+
+  .related-grid{
+    gap:18px;
+  }
+
+  .related-media{
+    margin-bottom:10px;
+    border-radius:6px;
+  }
+
+  .related-badge{
+    top:8px;
+    left:8px;
+    padding:4px 8px;
+    font-size:.58rem;
+  }
+
+  .related-cat{
+    font-size:.6rem;
+    margin-bottom:3px;
+  }
+
+  .related-name{
+    font-size:.86rem;
+    margin-bottom:4px;
+  }
+
+  .related-price{
+    font-size:.86rem;
+  }
+
+  footer{
+    padding:42px 0 0;
+  }
+
+  .footer-grid{
+    gap:24px;
+    padding-bottom:28px;
+  }
+
+  .footer-logo{
+    font-size:1.15rem;
+    margin-bottom:10px;
+  }
+
+  .footer-desc{
+    font-size:.78rem;
+    line-height:1.55;
+    margin-bottom:16px;
+  }
+
+  .f-title{
+    font-size:.68rem;
+    margin-bottom:12px;
+  }
+
+  .f-links{
+    gap:8px;
+  }
+
+  .f-links a{
+    font-size:.78rem;
+  }
+
+  .footer-bottom{
+    padding:15px 0;
+    font-size:.72rem;
+  }
+
+  /* Tablet */
+  @media(max-width:980px){
+    .product-detail{
+      padding:22px 0 30px;
+    }
+
+    .detail-grid{
+      grid-template-columns:260px 1fr;
+      gap:24px;
+      align-items:start;
+    }
+
+    .main-media{
+      position:relative;
+      top:auto;
+      width:260px;
+      max-width:260px;
+      aspect-ratio:1/1;
+      justify-self:start;
+    }
+
+    .detail-copy{
+      max-width:none;
+    }
+
+    .related-grid{
+      grid-template-columns:repeat(2,1fr);
+    }
+  }
+
+  /* Phones */
+  @media(max-width:720px){
+    .wrap{
+      padding:0 16px;
+    }
+
+    .header-inner{
+      height:62px;
+      padding:8px 16px;
+    }
+
+    .logo{
+      gap:7px;
+      font-size:1rem;
+    }
+
+    .brand-logo{
+      width:38px;
+      height:38px;
+      flex-basis:38px;
+    }
+
+    .product-detail{
+      padding:16px 0 26px;
+    }
+
+    .detail-grid{
+      display:block;
+      max-width:520px;
+      margin:0 auto;
+    }
+
+    .main-media{
+      position:relative;
+      top:auto;
+      width:min(78vw,300px);
+      max-width:300px;
+      height:auto;
+      aspect-ratio:1/1;
+      margin:0 auto 18px;
+      border-radius:6px;
+    }
+
+    .detail-copy{
+      width:100%;
+      max-width:none;
+    }
+
+    .badge{
+      margin-bottom:8px;
+    }
+
+    .detail-title{
+      font-size:1.65rem;
+      margin-bottom:7px;
+    }
+
+    .rating-row{
+      margin-bottom:12px;
+    }
+
+    .price-row{
+      margin-bottom:12px;
+    }
+
+    .price{
+      font-size:1.28rem;
+    }
+
+    .description{
+      font-size:.78rem;
+      line-height:1.45;
+      margin-bottom:12px;
+    }
+
+    .best-for{
+      margin-bottom:12px;
+    }
+
+    .purchase-row{
+      grid-template-columns:98px 1fr;
+      gap:8px;
+      padding:12px 0;
+    }
+
+    .qty,
+    .add-btn{
+      height:40px;
+    }
+
+    .add-btn{
+      font-size:.72rem;
+      padding:0 8px;
+    }
+
+    .inside{
+      padding:13px 0 10px;
+    }
+
+    .benefit-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px 12px;
+      padding-top:12px;
+    }
+
+    .benefit{
+      font-size:.64rem;
+    }
+
+    .related{
+      padding:30px 0 40px;
+    }
+
+    .related-head{
+      margin-bottom:18px;
+    }
+
+    .related-grid{
+      grid-template-columns:1fr 1fr;
+      gap:14px 12px;
+    }
+
+    .related-media{
+      margin-bottom:8px;
+    }
+
+    .related-name{
+      font-size:.8rem;
+    }
+
+    .related-price{
+      font-size:.8rem;
+    }
+
+    footer{
+      padding:34px 0 0;
+    }
+
+    .footer-grid{
+      grid-template-columns:1fr;
+      gap:20px;
+      padding-bottom:24px;
+    }
+
+    .social-ic{
+      width:32px;
+      height:32px;
+    }
+  }
+
+  /* Small phones */
+  @media(max-width:430px){
+    .main-media{
+      width:min(74vw,260px);
+      max-width:260px;
+      margin-bottom:15px;
+    }
+
+    .detail-title{
+      font-size:1.5rem;
+    }
+
+    .purchase-row{
+      grid-template-columns:92px 1fr;
+    }
+
+    .tag{
+      font-size:.62rem;
+      padding:4px 8px;
+    }
+
+    .related-grid{
+      grid-template-columns:1fr 1fr;
+      gap:12px 10px;
+    }
+
+    .related-badge{
+      font-size:.54rem;
+      padding:3px 7px;
+    }
+
+    .related-cat{
+      font-size:.56rem;
+    }
+
+    .related-name{
+      font-size:.76rem;
+    }
+
+    .related-price{
+      font-size:.76rem;
+    }
+  }
+
+
+  /* ULTRA-COMPACT PHONE TUNING */
+  @media(max-width:480px){
+    .product-detail{padding:12px 0 22px;}
+    .main-media{
+      width:min(68vw,230px);
+      max-width:230px;
+      margin-bottom:12px;
+    }
+    .detail-title{font-size:1.38rem;line-height:1.05;}
+    .detail-cat{font-size:.6rem;}
+    .badge{font-size:.58rem;padding:4px 8px;margin-bottom:7px;}
+    .rating-row{margin-bottom:9px;}
+    .price-row{margin-bottom:9px;}
+    .price{font-size:1.16rem;}
+    .description{font-size:.74rem;line-height:1.42;margin-bottom:10px;}
+    .best-for{margin-bottom:10px;}
+    .tag{font-size:.58rem;padding:4px 7px;}
+    .purchase-row{grid-template-columns:86px 1fr;padding:10px 0;}
+    .qty,.add-btn{height:38px;}
+    .add-btn{font-size:.68rem;}
+    .inside{padding:11px 0 9px;}
+    .inside h3{font-size:.88rem;margin-bottom:7px;}
+    .inside-list li{font-size:.68rem;}
+    .benefit-row{gap:8px 10px;padding-top:10px;}
+    .benefit{font-size:.59rem;}
+    .related{padding:26px 0 34px;}
+    .related-head{margin-bottom:14px;}
+    .related-head h2{font-size:1.45rem;}
+    .related-grid{gap:10px 8px;}
+    .related-name,.related-price{font-size:.72rem;}
+  }
+
+  /* ---------- UNIFIED NAVBAR ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+
+  .header-inner{
+    height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 40px;
+    max-width:1280px;
+    margin:0 auto;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.2rem;
+    font-weight:700;
+    letter-spacing:.01em;
+    min-width:0;
+  }
+
+  .brand-logo{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    display:block;
+    flex:0 0 38px;
+  }
+
+  .logo-text{
+    white-space:nowrap;
+  }
+
+  nav.navlinks{
+    display:flex;
+    gap:38px;
+  }
+
+  .navlink{
+    font-size:.8rem;
+    letter-spacing:.1em;
+    font-weight:500;
+    text-transform:uppercase;
+    position:relative;
+    padding-bottom:4px;
+    color:var(--ink);
+  }
+
+  .navlink.active{
+    color:var(--coral);
+  }
+
+  .navlink::after{
+    content:'';
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:0;
+    height:1px;
+    background:currentColor;
+    transition:width .3s ease;
+  }
+
+  .navlink:hover::after{
+    width:100%;
+  }
+
+  .cart-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    color:var(--ink);
+    border:none;
+    background:transparent;
+    padding:0;
+  }
+
+  .cart-btn svg{
+    width:19px;
+    height:19px;
+    stroke:currentColor;
+  }
+
+  .cart-badge{
+    position:absolute;
+    top:-2px;
+    right:-2px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.62rem;
+    font-weight:600;
+  }
+
+  .menu-toggle{
+    display:none;
+    width:24px;
+    height:18px;
+    position:relative;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+  }
+
+  .menu-toggle span{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:2px;
+    background:currentColor;
+  }
+
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+
+  .mobile-menu{
+    position:fixed;
+    inset:0;
+    background:var(--ink);
+    z-index:200;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:30px;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:.3s ease;
+  }
+
+  .mobile-menu.open{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+
+  .mobile-menu a{
+    color:#fff;
+    font-size:1.2rem;
+    font-family:'Playfair Display',serif;
+  }
+
+  .mobile-close{
+    position:absolute;
+    top:24px;
+    right:24px;
+    width:32px;
+    height:32px;
+    border:none;
+    background:transparent;
+    color:#fff;
+    font-size:1.8rem;
+  }
+
+  @media(max-width:720px){
+    .header-inner{
+      padding:8px 16px;
+    }
+
+    .logo{
+      gap:7px;
+      font-size:1rem;
+    }
+
+    .brand-logo{
+      width:38px;
+      height:38px;
+      flex-basis:38px;
+    }
+
+    nav.navlinks{
+      display:none;
+    }
+
+    .menu-toggle{
+      display:block;
+    }
+  }
+
+  @media(max-width:360px){
+    .logo-text{
+      font-size:.92rem;
+    }
+
+    .header-inner{
+      padding-left:12px;
+      padding-right:12px;
+    }
+  }
+
+
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="header-inner">
+    <a href="{% url 'home-page' %}" class="logo" aria-label="Arikey Skincare Home">
+      <img src="{% static 'images/logo.png' %}" alt="Arikey Skincare logo" class="brand-logo">
+      <span class="logo-text">Arikey Skincare</span>
+    </a>
+
+    <nav class="navlinks">
+      <a class="navlink" href="{% url 'home-page' %}">Home</a>
+      <a class="navlink active" href="{% url 'shop' %}">Shop</a>
+      <a class="navlink" href="{% url 'our-story' %}">Our Story</a>
+      <a class="navlink" href="{% url 'contact' %}">Contact</a>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a class="cart-btn" id="cartBtn" href="{% url 'cart' %}" aria-label="Shopping bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+        <span class="cart-badge" id="cartCount">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose" aria-label="Close menu">&times;</button>
+  <a href="{% url 'home-page' %}">Home</a>
+  <a href="{% url 'shop' %}">Shop</a>
+  <a href="{% url 'our-story' %}">Our Story</a>
+  <a href="{% url 'contact' %}">Contact</a>
+</div>
+
+<main>
+  <section class="product-detail">
+    <div class="wrap detail-grid">
+      <div class="main-media">
+        <img id="productImage" src="" alt="">
+        <div class="image-fallback" id="imageFallback">
+          <div><strong>Product image</strong><br>Place the product image in the same folder as this page.</div>
+        </div>
+      </div>
+
+      <div class="detail-copy">
+        <span class="badge" id="productBadge"></span>
+        <div class="detail-cat" id="productCat"></div>
+        <h1 class="detail-title" id="productName"></h1>
+
+        <div class="rating-row">
+          <span class="stars" id="productStars"></span>
+          <span class="rating-text" id="ratingText"></span>
+        </div>
+
+        <div class="price-row">
+          <span class="price" id="productPrice"></span>
+          <span class="old-price" id="oldPrice"></span>
+          <span class="save" id="saveText"></span>
+        </div>
+
+        <p class="description" id="productDescription"></p>
+
+        <div class="best-for">
+          <h3>Best For:</h3>
+          <div class="tag-row" id="bestForTags"></div>
+        </div>
+
+        <div class="purchase-row">
+          <div class="qty">
+            <button type="button" id="minusBtn" aria-label="Decrease quantity">−</button>
+            <span id="qtyValue">1</span>
+            <button type="button" id="plusBtn" aria-label="Increase quantity">+</button>
+          </div>
+
+          <button type="button" class="add-btn" id="addBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+            <span id="addBtnText">Add to Bag</span>
+          </button>
+        </div>
+        <div class="add-note" id="addNote"></div>
+
+        <div class="inside">
+          <h3>What's Inside</h3>
+          <ul class="inside-list" id="insideList"></ul>
+        </div>
+
+        <div class="benefit-row" id="benefitRow"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="related">
+    <div class="wrap">
+      <div class="related-head">
+        <span class="eyebrow">You Might Also Love</span>
+        <h2>Related Products</h2>
+      </div>
+      <div class="related-grid" id="relatedGrid"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Arikey Skincare</div>
+        <p class="footer-desc">Premium skincare crafted for radiant-looking, well-cared-for skin. Build a routine that feels simple, consistent, and made for you.</p>
+        <div class="socials">
+          <a class="social-ic" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.97.24 2.43.4a4.9 4.9 0 0 1 1.77 1.15 4.9 4.9 0 0 1 1.15 1.77c.16.46.35 1.26.4 2.43.07 1.25.07 1.65.07 4.85s0 3.6-.07 4.85c-.05 1.17-.24 1.97-.4 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.46.16-1.26.35-2.43.4-1.25.07-1.65.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.97-.24-2.43-.4a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.16-.46-.35-1.26-.4-2.43C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.24-1.97.4-2.43A4.9 4.9 0 0 1 3.82 3a4.9 4.9 0 0 1 1.77-1.15c.46-.16 1.26-.35 2.43-.4C9.27 1.38 9.7 1.38 12 1.38zM12 6.3a5.7 5.7 0 1 0 0 11.4 5.7 5.7 0 0 0 0-11.4zm0 9.4a3.7 3.7 0 1 1 0-7.4 3.7 3.7 0 0 1 0 7.4zm5.9-9.6a1.33 1.33 0 1 1-2.66 0 1.33 1.33 0 0 1 2.66 0z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V8c0-.9.25-1.5 1.55-1.5H16.7V3.7C16.4 3.66 15.4 3.57 14.24 3.57c-2.4 0-4.04 1.46-4.04 4.15V9.9H7.5V13h2.7v8h3.3z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3v13.2a2.6 2.6 0 1 1-2.1-2.55v-3.05a5.6 5.6 0 1 0 5.1 5.58V8.9a7.4 7.4 0 0 0 4.4 1.44V7.35c-2.4 0-4.4-1.9-4.4-4.35v-1z"/></svg></a>
+        </div>
+      </div>
+
+      <div>
+        <div class="f-title">Shop</div>
+        <div class="f-links">
+          <a href="{% url 'shop' %}">All Products</a>
+          <a href="{% url 'shop' %}">Whitening Soaps</a>
+          <a href="{% url 'shop' %}">Black Soaps</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="f-title">About</div>
+        <div class="f-links">
+          <a href="{% url 'our-story' %}">Our Story</a>
+          <a href="#">Our Ingredients</a>
+          <a href="#">Skin Tips</a>
+          <a href="#">Wholesale</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="f-title">Help</div>
+        <div class="f-links">
+          <a href="{% url 'contact' %}">Contact Us</a>
+          <a href="#">Shipping &amp; Returns</a>
+          <a href="#">FAQ</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Arikey Skincare. All rights reserved.</span>
+      <div class="pay-icons"><span>Free shipping over ₦30,000</span><span>VISA</span><span>MC</span><span>PayPal</span></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ==========================================================
+     ONE REUSABLE PAGE FOR ALL 27 PRODUCTS
+     Open like:
+     {% url 'product-details' %}?id=1
+     {% url 'product-details' %}?id=20
+     {% url 'product-details' %}?id=27
+     ========================================================== */
+
+  var products = [
+    {id:1,name:"5D Whitening Molato Soap (Small)",cat:"whitening",catLabel:"Whitening Soap",rating:4.5,count:427,price:12000,was:null,size:"Small Size",badge:"Bestseller",image:"{% static 'images/molato-small.jpg' %}"},
+    {id:2,name:"5D Whitening Molato Soap (Medium)",cat:"whitening",catLabel:"Whitening Soap",rating:4.5,count:638,price:17000,was:null,size:"Medium Size",badge:"Most Popular",image:"{% static 'images/molato-medium.jpg' %}"},
+    {id:3,name:"5D Whitening Molato Soap (Big)",cat:"whitening",catLabel:"Whitening Soap",rating:4.5,count:512,price:28000,was:32000,size:"Big Size",badge:"Best Value",image:"{% static 'images/molato-big.jpg' %}"},
+    {id:4,name:"5D Whitening Healing Black Soap (Small)",cat:"black",catLabel:"Black Soap",rating:4.5,count:389,price:8500,was:null,size:"Small Size",badge:"Healing",image:"{% static 'images/healing-black-soap-small.jpg' %}"},
+    {id:5,name:"5D Whitening Healing Black Soap (Medium)",cat:"black",catLabel:"Black Soap",rating:4.5,count:456,price:14000,was:null,size:"Medium Size",badge:"Popular",image:"{% static 'images/healing-black-soap-medium.jpg' %}"},
+    {id:6,name:"5D Whitening Healing Black Soap (Big)",cat:"black",catLabel:"Black Soap",rating:4.5,count:312,price:30000,was:35000,size:"Big Size",badge:"Best Value",image:"{% static 'images/healing-black-soap-big.jpg' %}"},
+    {id:7,name:"Lightening Soap (Small)",cat:"lightening",catLabel:"Lightening Soap",rating:4.5,count:298,price:10000,was:null,size:"Small Size",badge:"New",image:"{% static 'images/lightening-soap-small.jpg' %}"},
+    {id:8,name:"Lightening Soap (Big)",cat:"lightening",catLabel:"Lightening Soap",rating:4.5,count:347,price:26000,was:30000,size:"Big Size",badge:"Best Value",image:"{% static 'images/lightening-soap-big.jpg' %}"},
+    {id:9,name:"Face Soap",cat:"face",catLabel:"Face Care",rating:4.5,count:521,price:6000,was:null,size:null,badge:"Essential",image:"{% static 'images/face-soap.jpg' %}"},
+    {id:10,name:"Body Wash",cat:"body",catLabel:"Body Care",rating:4.5,count:384,price:15000,was:null,size:null,badge:"Popular",image:"{% static 'images/body-wash.jpg' %}"},
+    {id:11,name:"Body & Face Scrub",cat:"body",catLabel:"Body Care",rating:4.5,count:267,price:15000,was:null,size:null,badge:"New",image:"{% static 'images/body-face-scrub.jpg' %}"},
+    {id:12,name:"Pure Glow Oil",cat:"body",catLabel:"Body Care",rating:4.5,count:456,price:12000,was:null,size:null,badge:"Glow",image:"{% static 'images/pure-glow-oil.jpg' %}"},
+    {id:13,name:"Rude Oil",cat:"body",catLabel:"Body Care",rating:4.5,count:189,price:5000,was:null,size:null,badge:"Trending",image:"{% static 'images/rude-oil.jpg' %}"},
+    {id:14,name:"Whitening Face Cream",cat:"face",catLabel:"Face Care",rating:4.5,count:678,price:15000,was:null,size:null,badge:"Bestseller",image:"{% static 'images/whitening-face-cream.jpg' %}"},
+    {id:15,name:"Acne & Pimples Face Cream",cat:"face",catLabel:"Face Care",rating:4.5,count:534,price:12000,was:null,size:null,badge:"Healing",image:"{% static 'images/acne-pimples-face-cream.jpg' %}"},
+    {id:16,name:"Face Serum",cat:"face",catLabel:"Face Care",rating:4.5,count:412,price:12000,was:null,size:null,badge:"Premium",image:"{% static 'images/face-serum.jpg' %}"},
+    {id:17,name:"Face Toner",cat:"face",catLabel:"Face Care",rating:4.5,count:345,price:8000,was:null,size:null,badge:"Essential",image:"{% static 'images/face-toner.jpg' %}"},
+    {id:18,name:"Whitening Body Cream",cat:"body",catLabel:"Body Care",rating:4.5,count:892,price:20000,was:null,size:null,badge:"Bestseller",image:"{% static 'images/whitening-body-cream.jpg' %}"},
+    {id:19,name:"Hot Chocolate Body Cream",cat:"body",catLabel:"Body Care",rating:4.5,count:623,price:17000,was:null,size:null,badge:"Luxury",image:"{% static 'images/hot-chocolate-body-cream.jpg' %}"},
+    {id:20,name:"Lip Balm",cat:"lip",catLabel:"Lip Care",rating:4.5,count:756,price:3000,was:null,size:null,badge:"Essential",image:"{% static 'images/lip-balm.jpg' %}"},
+    {id:21,name:"Lip Scrub",cat:"lip",catLabel:"Lip Care",rating:4.5,count:423,price:3000,was:null,size:null,badge:"Self-Care",image:"{% static 'images/lip-scrub.jpg' %}"},
+    {id:22,name:"Barbie Pink Gloss",cat:"lip",catLabel:"Lip Care",rating:4.5,count:534,price:5000,was:null,size:null,badge:"Trending",image:"{% static 'images/barbie-pink-gloss.jpg' %}"},
+    {id:23,name:"Clear Gloss",cat:"lip",catLabel:"Lip Care",rating:4.5,count:398,price:5000,was:null,size:null,badge:"Classic",image:"{% static 'images/clear-gloss.jpg' %}"},
+    {id:24,name:"Brownie Gloss",cat:"lip",catLabel:"Lip Care",rating:4.5,count:467,price:5000,was:null,size:null,badge:"Popular",image:"{% static 'images/brownie-gloss.jpg' %}"},
+    {id:25,name:"Red Cherry Gloss",cat:"lip",catLabel:"Lip Care",rating:4.5,count:489,price:5000,was:null,size:null,badge:"Bold",image:"{% static 'images/red-cherry-gloss.jpg' %}"},
+    {id:26,name:"Brush",cat:"tools",catLabel:"Tools",rating:4.5,count:632,price:1000,was:null,size:null,badge:"Tool",image:"{% static 'images/brush.jpg' %}"},
+    {id:27,name:"Lip Mask",cat:"lip",catLabel:"Lip Care",rating:4.5,count:489,price:1000,was:null,size:null,badge:"Moisturizing",image:"{% static 'images/mask.jpg' %}"}
+    ,{id:101,name:"Face Set",cat:"combo",catLabel:"Combo Deal",rating:4.8,count:214,price:47000,was:58000,size:null,badge:"Skincare Routine",image:"{% static 'images/face-set.png' %}",
+      description:"A complete face-care bundle that brings together everyday essentials for a simple, coordinated routine.",
+      bestFor:["Face care","Complete routine","Everyday use"],
+      inside:["Face Soap","Whitening Face Cream","Face Serum","Face Toner","Lip Care Essential"]},
+    {id:102,name:"Student Fair Set",cat:"combo",catLabel:"Combo Deal",rating:4.8,count:156,price:57000,was:72000,size:null,badge:"Student Pick",image:"{% static 'images/student-fair.png' %}",
+      description:"A budget-friendly starter bundle curated for students, combining body, face, and lip-care essentials in one routine.",
+      bestFor:["Student routine","Body & face care","Value bundle"],
+      inside:["5D Whitening Molato Soap (Small)","Whitening Body Cream","Face Soap","Lip Balm","Lip Scrub"]},
+    {id:103,name:"Students Dark Set",cat:"combo",catLabel:"Combo Deal",rating:4.7,count:132,price:55000,was:68000,size:null,badge:"Acne Care",image:"{% static 'images/students-dark.png' %}",
+      description:"A student-friendly care set built around black soap and face-care essentials for a practical daily routine.",
+      bestFor:["Student routine","Face care","Black soap users"],
+      inside:["5D Whitening Healing Black Soap (Small)","Acne & Pimples Face Cream","Face Toner","Face Soap"]},
+    {id:104,name:"Full Set",cat:"combo",catLabel:"Combo Deal",rating:4.9,count:286,price:145000,was:185000,size:null,badge:"Ultimate Bundle",image:"{% static 'images/full-set.png' %}",
+      description:"A broad Arikey routine with body, face, soap, oil, and lip-care products for customers who want a complete collection.",
+      bestFor:["Full routine","Body & face care","Complete bundle"],
+      inside:["5D Whitening Molato Soap (Big)","Healing Black Soap (Big)","Whitening Body Cream","Face Serum","Face Toner","Pure Glow Oil","Lip Balm","Lip Scrub"]},
+    {id:105,name:"Hot Choco Set",cat:"combo",catLabel:"Combo Deal",rating:4.8,count:174,price:85000,was:105000,size:null,badge:"Indulgence",image:"{% static 'images/hot-choco.jpg' %}",
+      description:"A rich body-care bundle centred on the Hot Chocolate range, with cleansing, exfoliating, and moisturizing essentials.",
+      bestFor:["Body care","Self-care routine","Moisturizing"],
+      inside:["Hot Chocolate Body Cream","Body Wash","Body & Face Scrub","Pure Glow Oil","Face Soap"]},
+    {id:106,name:"Caramel Set",cat:"combo",catLabel:"Combo Deal",rating:4.8,count:167,price:100000,was:125000,size:null,badge:"Glow Bundle",image:"{% static 'images/caramel-set.png' %}",
+      description:"A glow-focused bundle combining body cream, oil, and face-care essentials in one coordinated routine.",
+      bestFor:["Glow routine","Body care","Face care"],
+      inside:["Pure Glow Oil","Whitening Body Cream","Face Serum","Face Toner","Body Wash"]},
+    {id:107,name:"Mini Set",cat:"combo",catLabel:"Combo Deal",rating:4.7,count:143,price:80000,was:95000,size:null,badge:"Travel Kit",image:"{% static 'images/mini-set.png' %}",
+      description:"A compact selection of Arikey essentials for a smaller routine or an easier-to-carry collection.",
+      bestFor:["Compact routine","Travel-friendly","Starter bundle"],
+      inside:["5D Whitening Molato Soap (Small)","Healing Black Soap (Small)","Face Soap","Face Serum","Lip Balm"]}
+
+  ];
+
+  var descriptions = {
+    whitening:"A signature Arikey cleansing essential designed to fit into a consistent brightening-focused body-care routine. Use it as part of your regular skincare steps and pair with your preferred moisturizer or body cream.",
+    black:"A rich black-soap cleansing option created for customers who prefer a deeper-feeling cleanse while keeping their routine simple and consistent.",
+    lightening:"A daily cleansing soap for customers building a simple tone-care routine. It works easily alongside your other Arikey body-care essentials.",
+    face:"A focused face-care essential designed to fit naturally into your everyday routine. Keep your steps simple and use consistently according to the product directions.",
+    body:"A body-care essential made for an easy everyday routine, whether you are cleansing, exfoliating, moisturizing, or adding a finishing glow step.",
+    lip:"A lip-care essential designed for an easy routine that keeps your lips looking polished, comfortable, and well cared for.",
+    tools:"A practical reusable beauty tool for neat, controlled application during your lip-care routine."
+  };
+
+  var bestFor = {
+    whitening:["Tone-care routine","Body care","Daily cleansing"],
+    black:["Deep-feel cleansing","Body care","Routine care"],
+    lightening:["Daily cleansing","Tone-care routine","Body care"],
+    face:["Face care","Daily routine","Simple layering"],
+    body:["Body care","Daily routine","Glow routine"],
+    lip:["Lip care","Daily touch-ups","Routine care"],
+    tools:["Lip care","Application","Reusable tool"]
+  };
+
+  var benefitsByCat = {
+    combo:["Bundle Value","Complete Routine","Multiple Essentials","Free Shipping Over ₦30,000"],
+    tools:["Easy Application","Reusable Tool","Lip Care Essential","Free Shipping Over ₦30,000"],
+    lip:["Lip Care Essential","Routine Friendly","Easy Daily Use","Free Shipping Over ₦30,000"],
+    default:["5D Whitening Technology","Selected Ingredients","Routine Friendly","Free Shipping Over ₦30,000"]
+  };
+
+  function nairaFmt(n){ return "₦" + Number(n).toLocaleString("en-NG"); }
+
+  function stars(r){
+    var full = Math.floor(r);
+    return "★".repeat(full) + (r % 1 >= .5 ? "☆" : "") + "☆".repeat(Math.max(0,5-full-(r%1>=.5?1:0)));
+  }
+
+  function getProduct(){
+    var params = new URLSearchParams(window.location.search);
+    var id = parseInt(params.get("id"),10);
+    return products.find(function(p){return p.id===id;}) || products[0];
+  }
+
+  function getBag(){
+    try{return JSON.parse(localStorage.getItem("arikeyBag") || "[]");}
+    catch(e){return [];}
+  }
+
+  function setBag(items){
+    localStorage.setItem("arikeyBag", JSON.stringify(items));
+  }
+
+  function updateBadge(){
+    var total = getBag().reduce(function(sum,item){return sum + item.qty;},0);
+    document.getElementById("cartCount").textContent = total;
+  }
+
+  function iconSvg(type){
+    var icons = {
+      sparkle:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M12 2l1.5 5L18 8.5 13.5 10 12 15l-1.5-5L6 8.5 10.5 7 12 2z"/><path d="M19 14l.8 2.4L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.6L19 14z"/></svg>',
+      leaf:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M20 4c-7 0-12 2-14 6-2 4 1 8 1 8s4 1 8-1c4-2 5-7 5-13z"/><path d="M6 18c2-4 5-7 10-10"/></svg>',
+      shield:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-5"/></svg>',
+      truck:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/></svg>'
+    };
+    return icons[type];
+  }
+
+  var current = getProduct();
+  var qty = 1;
+
+  document.title = current.name + " — Arikey Skincare";
+  document.getElementById("productBadge").textContent = current.badge;
+  document.getElementById("productCat").textContent = current.catLabel;
+  document.getElementById("productName").textContent = current.name;
+  document.getElementById("productStars").textContent = stars(current.rating);
+  document.getElementById("ratingText").textContent = current.rating.toFixed(1) + " (" + current.count + " reviews)";
+  document.getElementById("productPrice").textContent = nairaFmt(current.price);
+
+  if(current.was){
+    document.getElementById("oldPrice").textContent = nairaFmt(current.was);
+    document.getElementById("saveText").textContent = "Save " + nairaFmt(current.was-current.price);
+  }else{
+    document.getElementById("oldPrice").style.display = "none";
+    document.getElementById("saveText").style.display = "none";
+  }
+
+  document.getElementById("productDescription").textContent = current.description || descriptions[current.cat] || descriptions.body;
+
+  var img = document.getElementById("productImage");
+  img.src = current.image;
+  img.alt = current.name;
+  img.addEventListener("error", function(){
+    img.style.display = "none";
+    document.getElementById("imageFallback").style.display = "flex";
+  });
+
+  document.getElementById("bestForTags").innerHTML = (current.bestFor || bestFor[current.cat] || bestFor.body)
+    .map(function(x){return '<span class="tag">'+x+'</span>';}).join("");
+
+  var inside = current.inside ? current.inside.slice() : [
+    "1 × " + current.name,
+    current.size ? "Size: " + current.size : "Category: " + current.catLabel,
+    "Arikey Skincare retail packaging"
+  ];
+  if(current.cat === "tools"){
+    inside = ["1 × Lip Care Brush","Reusable applicator","For neat lip-care product application"];
+  }
+  document.getElementById("insideList").innerHTML = inside.map(function(x){
+    return '<li><span class="check">✓</span><span>'+x+'</span></li>';
+  }).join("");
+
+  var benefits = benefitsByCat[current.cat] || benefitsByCat.default;
+  var iconTypes = current.cat === "tools" ? ["sparkle","shield","leaf","truck"] :
+                  current.cat === "lip" ? ["sparkle","leaf","shield","truck"] :
+                  ["sparkle","leaf","shield","truck"];
+
+  document.getElementById("benefitRow").innerHTML = benefits.map(function(x,i){
+    return '<div class="benefit">'+iconSvg(iconTypes[i])+'<span>'+x+'</span></div>';
+  }).join("");
+
+  function refreshPrice(){
+    document.getElementById("qtyValue").textContent = qty;
+    document.getElementById("addBtnText").textContent = "Add to Bag — " + nairaFmt(current.price * qty);
+  }
+  refreshPrice();
+
+  document.getElementById("minusBtn").addEventListener("click", function(){
+    if(qty>1){qty--;refreshPrice();}
+  });
+  document.getElementById("plusBtn").addEventListener("click", function(){
+    if(qty<10){qty++;refreshPrice();}
+  });
+
+  document.getElementById("addBtn").addEventListener("click", function(){
+    var bag = getBag();
+    var existing = bag.find(function(x){return x.id===current.id;});
+    if(existing){ existing.qty += qty; }
+    else{ bag.push({id:current.id,qty:qty,name:current.name,price:current.price,image:current.image}); }
+    setBag(bag);
+    updateBadge();
+    document.getElementById("addNote").textContent = qty + (qty===1 ? " item added" : " items added") + " to your bag.";
+  });
+
+  function relatedProducts(){
+    var same = products.filter(function(p){return p.id!==current.id && p.cat===current.cat;});
+    var other = products.filter(function(p){return p.id!==current.id && p.cat!==current.cat;});
+    return same.concat(other).slice(0,4);
+  }
+
+  document.getElementById("relatedGrid").innerHTML = relatedProducts().map(function(p){
+    return '<a class="related-card" href="{% url 'product-details' %}?id='+p.id+'">' +
+      '<div class="related-media">' +
+        '<span class="related-badge">'+p.badge+'</span>' +
+        '<img src="'+p.image+'" alt="'+p.name+'">' +
+      '</div>' +
+      '<div class="related-cat">'+p.catLabel+'</div>' +
+      '<div class="related-name">'+p.name+'</div>' +
+      '<div class="related-price">'+nairaFmt(p.price)+'</div>' +
+    '</a>';
+  }).join("");
+
+  var menuToggle = document.getElementById("menuToggle");
+  var mobileMenu = document.getElementById("mobileMenu");
+  var mobileClose = document.getElementById("mobileClose");
+  menuToggle.addEventListener("click", function(){mobileMenu.classList.add("open");document.body.style.overflow="hidden";});
+  mobileClose.addEventListener("click", function(){mobileMenu.classList.remove("open");document.body.style.overflow="";});
+  mobileMenu.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", function(){mobileMenu.classList.remove("open");document.body.style.overflow="";});
+  });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+  updateBadge();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,779 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Arikey Skincare</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf6ef;
+    --cream-2:#f3ede1;
+    --ink:#1c1410;
+    --ink-soft:#4a4038;
+    --coral:#d1495b;
+    --coral-dark:#b83a4b;
+    --gold:#c9a227;
+    --amber-bg:#f7e6bd;
+    --amber-ic:#b3821f;
+    --line:rgba(28,20,16,0.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Jost',sans-serif;color:var(--ink);background:var(--cream);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+  a{color:inherit;text-decoration:none;}
+  button,select,textarea,input{font-family:inherit;}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 40px;}
+  .eyebrow{letter-spacing:.18em;font-size:.75rem;font-weight:600;text-transform:uppercase;color:var(--coral);}
+
+  /* ---------- HEADER — matches the other pages ---------- */
+  header{
+    position:sticky;top:0;z-index:100;
+    height:62px;
+    background:rgba(250,246,239,.92);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+    transition:background .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+  }
+  header.solid{
+    background:rgba(250,246,239,.92);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    height:62px;padding:8px 40px;max-width:1280px;margin:0 auto;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-size:1.2rem;font-weight:700;letter-spacing:.01em;
+  }
+  .brand-logo{width:38px;height:38px;object-fit:contain;display:block;flex:0 0 38px;}
+  nav.navlinks{display:flex;gap:38px;}
+  .navlink{
+    font-size:.8rem;letter-spacing:.1em;font-weight:500;text-transform:uppercase;
+    position:relative;padding-bottom:4px;color:var(--ink);
+  }
+  .navlink.active{color:var(--coral);}
+  .navlink::after{
+    content:'';position:absolute;left:0;bottom:0;width:0;height:1px;
+    background:currentColor;transition:width .3s ease;
+  }
+  .navlink:hover::after{width:100%;}
+  .cart-btn{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:34px;height:34px;color:var(--ink);border:none;background:transparent;padding:0;
+    cursor:pointer;appearance:none;-webkit-appearance:none;
+  }
+  .cart-btn svg{width:19px;height:19px;stroke:currentColor;}
+  .cart-badge{
+    position:absolute;top:-2px;right:-2px;background:var(--coral);color:#fff;
+    font-size:.62rem;font-weight:600;width:16px;height:16px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .menu-toggle{display:none;width:24px;height:18px;position:relative;color:var(--ink);}
+  .menu-toggle span{position:absolute;left:0;width:100%;height:2px;background:currentColor;transition:.3s;}
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--ink);z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+    opacity:0;visibility:hidden;transform:translateY(-12px);transition:.3s ease;
+  }
+  .mobile-menu.open{opacity:1;visibility:visible;transform:translateY(0);}
+  .mobile-menu a{color:#fff;font-size:1.3rem;font-family:'Playfair Display',serif;}
+  .mobile-close{position:absolute;top:28px;right:32px;color:#fff;font-size:1.8rem;width:30px;height:30px;}
+
+  /* ---------- HERO (compact) ---------- */
+  .contact-hero{padding:42px 24px 30px;text-align:center;}
+  .contact-hero h1{font-size:clamp(1.8rem,3.6vw,2.5rem);font-weight:600;margin:8px 0 10px;}
+  .contact-hero p{max-width:560px;margin:0 auto;color:var(--ink-soft);font-size:.88rem;line-height:1.5;font-weight:300;}
+
+  /* ---------- INFO CARDS (compact) ---------- */
+  .info-cards{padding:8px 0 28px;}
+  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 42px 24px;}
+  .info-card{background:var(--cream-2);border-radius:6px;padding:16px 14px;text-align:center;transition:transform .3s ease, box-shadow .3s ease;}
+  .info-card:hover{transform:translateY(-5px);box-shadow:0 18px 36px rgba(28,20,16,.08);}
+  .info-icon{width:36px;height:36px;border-radius:50%;background:var(--amber-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 9px;color:var(--amber-ic);}
+  .info-icon svg{width:16px;height:16px;}
+  .info-card h3{font-size:.9rem;font-weight:700;margin-bottom:4px;}
+  .info-card p{color:var(--ink-soft);font-size:.78rem;line-height:1.45;font-weight:300;}
+
+  /* ---------- FORM + MAP (compact) ---------- */
+  .contact-main{padding-bottom:34px;}
+  .cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;padding:0 10px 30px;}
+  .cm-grid h2{font-size:1.12rem;font-weight:600;margin-bottom:12px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+  .field{margin-bottom:8px;}
+  .field label{display:block;font-size:.78rem;font-weight:500;margin-bottom:4px;}
+  .field label .req{color:var(--coral);margin-left:2px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:4px;background:#fff;
+    font-size:.82rem;color:var(--ink);transition:border-color .25s;
+  }
+  .field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234a4038' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+  .field textarea{resize:vertical;min-height:72px;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--coral);}
+  .char-count{font-size:.7rem;color:var(--ink-soft);margin-top:3px;text-align:right;}
+  .submit-btn{
+    width:100%;padding:10px;background:var(--coral);color:#fff;border-radius:4px;font-weight:600;
+    font-size:.8rem;letter-spacing:.03em;transition:background .25s, transform .25s;
+  }
+  .submit-btn:hover{background:var(--coral-dark);}
+  .submit-btn:disabled{opacity:.6;cursor:not-allowed;}
+  .form-success{
+    display:none;margin-top:12px;padding:12px 14px;background:#eef7ee;border:1px solid #bfe0bf;
+    border-radius:4px;color:#2c5c2c;font-size:.82rem;
+  }
+
+  /* Map mockup */
+  .map-box{
+    position:relative;border-radius:6px;overflow:hidden;aspect-ratio:16/8.8;background:#e7e2d6;
+    border:1px solid var(--line);
+  }
+  .map-bg{
+    position:absolute;inset:0;
+    background:
+      linear-gradient(100deg, transparent 45%, rgba(140,180,210,.55) 46%, rgba(140,180,210,.55) 52%, transparent 53%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 2px, transparent 2px 60px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 2px, transparent 2px 70px),
+      #e9e4d6;
+  }
+  .map-road{position:absolute;background:#fff;}
+  .map-road.v1{left:62%;top:0;bottom:0;width:14px;transform:skewX(-6deg);}
+  .map-road.h1{top:38%;left:0;right:0;height:10px;}
+  .map-pin{
+    position:absolute;left:52%;top:44%;transform:translate(-50%,-100%);
+    width:28px;height:28px;
+  }
+  .map-pin svg{width:100%;height:100%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));}
+  .map-label{position:absolute;font-size:.62rem;font-weight:600;padding:2px 5px;background:rgba(255,255,255,.85);border-radius:3px;white-space:nowrap;}
+  .map-open{
+    position:absolute;top:10px;left:10px;background:#fff;padding:7px 11px;border-radius:4px;
+    font-size:.74rem;font-weight:600;color:#1a5fd6;display:flex;align-items:center;gap:5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  .map-open svg{width:12px;height:12px;}
+  .map-credit{position:absolute;bottom:6px;right:10px;font-size:.6rem;color:var(--ink-soft);}
+
+  .store-info{margin-top:12px;background:var(--cream-2);border-radius:6px;padding:14px 16px;}
+  .store-info h3{font-size:.92rem;font-weight:600;margin-bottom:9px;}
+  .store-line{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .store-line:last-child{margin-bottom:0;}
+  .store-ic{width:28px;height:28px;flex-shrink:0;border-radius:50%;background:var(--amber-bg);display:flex;align-items:center;justify-content:center;color:var(--amber-ic);}
+  .store-ic svg{width:15px;height:15px;}
+  .store-line .name{font-weight:600;margin-bottom:2px;font-size:.84rem;}
+  .store-line p{color:var(--ink-soft);font-size:.76rem;line-height:1.4;font-weight:300;}
+
+  /* ---------- FAQ (compact) ---------- */
+  .faq{background:var(--cream-2);padding:38px 0;}
+  .faq-head{text-align:center;max-width:560px;margin:0 auto 20px;}
+  .faq-head h2{font-size:clamp(1.4rem,2.5vw,1.8rem);font-weight:600;margin:6px 0 0;}
+  .faq-list{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
+  .faq-item{background:var(--cream);border-radius:6px;overflow:hidden;}
+  .faq-q{
+    width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:11px 15px;text-align:left;font-weight:600;font-size:.82rem;cursor:pointer;
+  }
+  .faq-q .plus{
+    flex-shrink:0;width:16px;height:16px;position:relative;
+  }
+  .faq-q .plus::before,.faq-q .plus::after{
+    content:'';position:absolute;background:var(--ink-soft);transition:transform .3s ease, opacity .3s ease;
+  }
+  .faq-q .plus::before{left:0;top:50%;width:100%;height:1.5px;transform:translateY(-50%);}
+  .faq-q .plus::after{top:0;left:50%;width:1.5px;height:100%;transform:translateX(-50%);}
+  .faq-item.open .plus::after{transform:translateX(-50%) rotate(90deg);opacity:0;}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .faq-a-inner{padding:0 15px 12px;color:var(--ink-soft);font-size:.78rem;line-height:1.5;font-weight:300;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:#170f0c;color:rgba(255,255,255,.7);padding:52px 0 0;}
+  .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:34px;padding-bottom:38px;}
+  .footer-logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:16px;}
+  .footer-desc{font-size:.92rem;line-height:1.75;margin-bottom:24px;max-width:340px;}
+  .socials{display:flex;gap:12px;}
+  .social-ic{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;transition:.3s;}
+  .social-ic:hover{background:var(--coral);}
+  .social-ic svg{width:16px;height:16px;fill:#fff;}
+  .f-title{color:#fff;font-size:.78rem;letter-spacing:.14em;font-weight:600;text-transform:uppercase;margin-bottom:22px;}
+  .f-links{display:flex;flex-direction:column;gap:14px;}
+  .f-links a{font-size:.92rem;transition:.25s;}
+  .f-links a:hover{color:#fff;}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding:18px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:.82rem;color:rgba(255,255,255,.5);}
+  .pay-icons{display:flex;align-items:center;gap:14px;}
+  .pay-icons span{border:1px solid rgba(255,255,255,.2);padding:4px 8px;border-radius:3px;font-size:.68rem;font-weight:600;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:980px){
+    .info-grid{grid-template-columns:1fr;}
+    .cm-grid{grid-template-columns:1fr;gap:34px;}
+    .footer-grid{grid-template-columns:1fr 1fr;row-gap:40px;}
+  }
+  @media (max-width:720px){
+    nav.navlinks{display:none;}
+    .menu-toggle{display:block;}
+    .wrap{padding:0 22px;}
+    .header-inner{padding:10px 22px;}
+    .field-row{grid-template-columns:1fr;gap:0;}
+    .faq-q{padding:12px 14px;font-size:.85rem;}
+    .faq-a-inner{padding:0 14px 14px;}
+    .footer-grid{grid-template-columns:1fr;gap:34px;}
+    .footer-bottom{flex-direction:column;align-items:flex-start;}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+  :focus-visible{outline:2px solid var(--coral);outline-offset:3px;}
+
+  /* ---------- UNIFIED NAVBAR ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+
+  .header-inner{
+    height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 40px;
+    max-width:1280px;
+    margin:0 auto;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.2rem;
+    font-weight:700;
+    letter-spacing:.01em;
+    min-width:0;
+  }
+
+  .brand-logo{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    display:block;
+    flex:0 0 38px;
+  }
+
+  .logo-text{
+    white-space:nowrap;
+  }
+
+  nav.navlinks{
+    display:flex;
+    gap:38px;
+  }
+
+  .navlink{
+    font-size:.8rem;
+    letter-spacing:.1em;
+    font-weight:500;
+    text-transform:uppercase;
+    position:relative;
+    padding-bottom:4px;
+    color:var(--ink);
+  }
+
+  .navlink.active{
+    color:var(--coral);
+  }
+
+  .navlink::after{
+    content:'';
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:0;
+    height:1px;
+    background:currentColor;
+    transition:width .3s ease;
+  }
+
+  .navlink:hover::after{
+    width:100%;
+  }
+
+  .cart-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    color:var(--ink);
+    border:none;
+    background:transparent;
+    padding:0;
+  }
+
+  .cart-btn svg{
+    width:19px;
+    height:19px;
+    stroke:currentColor;
+  }
+
+  .cart-badge{
+    position:absolute;
+    top:-2px;
+    right:-2px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.62rem;
+    font-weight:600;
+  }
+
+  .menu-toggle{
+    display:none;
+    width:24px;
+    height:18px;
+    position:relative;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+  }
+
+  .menu-toggle span{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:2px;
+    background:currentColor;
+  }
+
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+
+  .mobile-menu{
+    position:fixed;
+    inset:0;
+    background:var(--ink);
+    z-index:200;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:30px;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:.3s ease;
+  }
+
+  .mobile-menu.open{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+
+  .mobile-menu a{
+    color:#fff;
+    font-size:1.2rem;
+    font-family:'Playfair Display',serif;
+  }
+
+  .mobile-close{
+    position:absolute;
+    top:24px;
+    right:24px;
+    width:32px;
+    height:32px;
+    border:none;
+    background:transparent;
+    color:#fff;
+    font-size:1.8rem;
+  }
+
+  @media(max-width:720px){
+    .header-inner{
+      padding:8px 16px;
+    }
+
+    .logo{
+      gap:7px;
+      font-size:1rem;
+    }
+
+    .brand-logo{
+      width:38px;
+      height:38px;
+      flex-basis:38px;
+    }
+
+    nav.navlinks{
+      display:none;
+    }
+
+    .menu-toggle{
+      display:block;
+    }
+  }
+
+  @media(max-width:360px){
+    .logo-text{
+      font-size:.92rem;
+    }
+
+    .header-inner{
+      padding-left:12px;
+      padding-right:12px;
+    }
+  }
+
+
+  /* ---------- CONTACT MOBILE ---------- */
+  @media(max-width:720px){
+    .wrap{padding:0 16px;}
+    .contact-hero{padding:30px 16px 22px;}
+    .contact-hero h1{font-size:1.8rem;margin:7px 0 8px;}
+    .contact-hero p{font-size:.78rem;line-height:1.45;}
+    .info-cards{padding:4px 0 22px;}
+    .info-grid{grid-template-columns:1fr;gap:10px;padding:0 0 20px;}
+    .info-card{padding:14px 12px;}
+    .info-icon{width:34px;height:34px;margin-bottom:7px;}
+    .info-card h3{font-size:.84rem;}
+    .info-card p{font-size:.72rem;}
+    .contact-main{padding-bottom:26px;}
+    .cm-grid{grid-template-columns:1fr;gap:22px;padding:0 0 22px;}
+    .cm-grid h2{font-size:1.05rem;margin-bottom:10px;}
+    .field-row{grid-template-columns:1fr;gap:0;margin-bottom:0;}
+    .field{margin-bottom:8px;}
+    .field label{font-size:.74rem;}
+    .field input,.field select,.field textarea{padding:9px 10px;font-size:.78rem;}
+    .field textarea{min-height:72px;}
+    .submit-btn{padding:10px;font-size:.76rem;}
+    .map-box{aspect-ratio:16/9;}
+    .store-info{margin-top:10px;padding:12px 14px;}
+    .store-line{gap:8px;margin-bottom:9px;}
+    .store-ic{width:26px;height:26px;}
+    .store-line .name{font-size:.8rem;}
+    .store-line p{font-size:.72rem;}
+    .faq{padding:32px 0;}
+    .faq-head{margin-bottom:16px;}
+    .faq-head h2{font-size:1.45rem;}
+    .faq-q{padding:10px 12px;font-size:.78rem;}
+    .faq-a-inner{padding:0 12px 11px;font-size:.72rem;}
+    footer{padding-top:38px;}
+    .footer-grid{grid-template-columns:1fr;gap:22px;padding-bottom:26px;}
+  }
+
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="header-inner">
+    <a href="{% url 'home-page' %}" class="logo" aria-label="Arikey Skincare Home">
+      <img src="{% static 'images/logo.png' %}" alt="Arikey Skincare logo" class="brand-logo">
+      <span class="logo-text">Arikey Skincare</span>
+    </a>
+
+    <nav class="navlinks">
+      <a class="navlink" href="{% url 'home-page' %}">Home</a>
+      <a class="navlink" href="{% url 'shop' %}">Shop</a>
+      <a class="navlink" href="{% url 'our-story' %}">Our Story</a>
+      <a class="navlink active" href="{% url 'contact' %}">Contact</a>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a class="cart-btn" id="cartBtn" href="{% url 'cart' %}" aria-label="Shopping bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+        <span class="cart-badge" id="cartCount">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose" aria-label="Close menu">&times;</button>
+  <a href="{% url 'home-page' %}">Home</a>
+  <a href="{% url 'shop' %}">Shop</a>
+  <a href="{% url 'our-story' %}">Our Story</a>
+  <a href="{% url 'contact' %}">Contact</a>
+</div>
+
+<section class="contact-hero" id="contact">
+  <span class="eyebrow">Get In Touch</span>
+  <h1>Contact Us</h1>
+  <p>Have a question, need help finding the perfect product, or just want to say hello? We would love to hear from you.</p>
+</section>
+
+<section class="info-cards wrap">
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+      <h3>Email Us</h3>
+      <p>hello@arikeyskincare.com<br>Reply within 24 hours</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.9 2.2z"/></svg></div>
+      <h3>Call Us</h3>
+      <p>+234 800 567 8901<br>Mon-Fri, 9am-6pm WAT</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <h3>Visit Us</h3>
+      <p>42A Admiralty Way<br>Lekki Phase 1, Lagos</p>
+    </div>
+  </div>
+</section>
+
+<section class="contact-main wrap">
+  <div class="cm-grid">
+    <div>
+      <h2>Send Us a Message</h2>
+      <form id="contactForm" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">First Name <span class="req">*</span></label>
+            <input type="text" id="firstName" name="firstName" placeholder="Ada" required>
+          </div>
+          <div class="field">
+            <label for="lastName">Last Name <span class="req">*</span></label>
+            <input type="text" id="lastName" name="lastName" placeholder="Obi" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="email">Email Address <span class="req">*</span></label>
+          <input type="email" id="email" name="email" placeholder="ada@email.com" required>
+        </div>
+        <div class="field">
+          <label for="subject">Subject <span class="req">*</span></label>
+          <select id="subject" name="subject" required>
+            <option value="" disabled selected>Select a topic</option>
+            <option value="order">Order Question</option>
+            <option value="product">Product Advice</option>
+            <option value="wholesale">Wholesale &amp; Distribution</option>
+            <option value="shipping">Shipping &amp; Returns</option>
+            <option value="other">Something Else</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message">Message <span class="req">*</span></label>
+          <textarea id="message" name="message" maxlength="500" placeholder="Tell us how we can help..." required></textarea>
+          <div class="char-count"><span id="charCount">0</span>/500 characters</div>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+        <div class="form-success" id="formSuccess">Thanks for reaching out — our team will get back to you within 24 hours.</div>
+      </form>
+    </div>
+
+    <div>
+      <h2>Find Us</h2>
+      <div class="map-box">
+        <div class="map-bg"></div>
+        <div class="map-road v1"></div>
+        <div class="map-road h1"></div>
+        <span class="map-label" style="top:12%;left:8%;color:#2f7d4f;">Fitness Factory</span>
+        <span class="map-label" style="top:22%;left:74%;color:#2255aa;">Providence Mall</span>
+        <span class="map-label" style="top:34%;left:6%;color:#b0361f;">Baykins Pharmacy</span>
+        <span class="map-label" style="top:44%;left:66%;color:#1a5fd6;">Prince Ebeano Supermarket</span>
+        <span class="map-label" style="top:66%;left:52%;color:#8a3fae;">Queens Park Events Center</span>
+        <div class="map-pin">
+          <svg viewBox="0 0 24 24" fill="#d1495b"><path d="M12 0C7 0 3 4 3 9c0 6.7 9 15 9 15s9-8.3 9-15c0-5-4-9-9-9z"/><circle cx="12" cy="9" r="3.4" fill="#fff"/></svg>
+        </div>
+        <a class="map-open" href="https://www.google.com/maps/search/?api=1&query=42A+Admiralty+Way+Lekki+Phase+1+Lagos+Nigeria" target="_blank" rel="noopener">
+          Open in Maps
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+        </a>
+        <span class="map-credit">Map data &copy; 2026 Google</span>
+      </div>
+
+      <div class="store-info">
+        <div class="store-line">
+          <div class="store-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></div>
+          <div>
+            <div class="name">Arikey Skincare Store</div>
+            <p>42A Admiralty Way, Lekki Phase 1<br>Lagos, Nigeria</p>
+          </div>
+        </div>
+        <div class="store-line">
+          <div class="store-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+          <div>
+            <div class="name">Opening Hours</div>
+            <p>Monday – Friday: 9:00 AM – 7:00 PM<br>Saturday: 10:00 AM – 6:00 PM<br>Sunday: Closed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <div class="faq-head">
+      <span class="eyebrow">Quick Answers</span>
+      <h2>Frequently Asked Questions</h2>
+    </div>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Arikey Skincare</div>
+        <p class="footer-desc">Premium skincare crafted with powerful active ingredients for radiant, even-toned skin. We believe every skin tone deserves to glow with confidence.</p>
+        <div class="socials">
+          <a class="social-ic" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.97.24 2.43.4a4.9 4.9 0 0 1 1.77 1.15 4.9 4.9 0 0 1 1.15 1.77c.16.46.35 1.26.4 2.43.07 1.25.07 1.65.07 4.85s0 3.6-.07 4.85c-.05 1.17-.24 1.97-.4 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.46.16-1.26.35-2.43.4-1.25.07-1.65.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.97-.24-2.43-.4a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.16-.46-.35-1.26-.4-2.43C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.24-1.97.4-2.43A4.9 4.9 0 0 1 3.82 3a4.9 4.9 0 0 1 1.77-1.15c.46-.16 1.26-.35 2.43-.4C9.27 1.38 9.7 1.38 12 1.38zM12 6.3a5.7 5.7 0 1 0 0 11.4 5.7 5.7 0 0 0 0-11.4zm0 9.4a3.7 3.7 0 1 1 0-7.4 3.7 3.7 0 0 1 0 7.4zm5.9-9.6a1.33 1.33 0 1 1-2.66 0 1.33 1.33 0 0 1 2.66 0z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V8c0-.9.25-1.5 1.55-1.5H16.7V3.7C16.4 3.66 15.4 3.57 14.24 3.57c-2.4 0-4.04 1.46-4.04 4.15V9.9H7.5V13h2.7v8h3.3z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3v13.2a2.6 2.6 0 1 1-2.1-2.55v-3.05a5.6 5.6 0 1 0 5.1 5.58V8.9a7.4 7.4 0 0 0 4.4 1.44V7.35c-2.4 0-4.4-1.9-4.4-4.35v-1z"/></svg></a>
+          <a class="social-ic" href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.65 19.3c-.05-.8-.1-2.05.02-2.93.11-.8.75-5.1.75-5.1s-.19-.38-.19-.94c0-.88.51-1.54 1.15-1.54.54 0 .8.4.8.89 0 .54-.35 1.36-.53 2.11-.15.63.32 1.14.94 1.14 1.13 0 1.99-1.19 1.99-2.9 0-1.52-1.09-2.58-2.65-2.58-1.8 0-2.86 1.35-2.86 2.75 0 .54.21 1.13.47 1.44a.19.19 0 0 1 .04.18c-.05.2-.16.63-.18.72-.03.12-.1.15-.22.09-.85-.4-1.38-1.63-1.38-2.63 0-2.14 1.56-4.11 4.48-4.11 2.35 0 4.18 1.68 4.18 3.92 0 2.34-1.47 4.22-3.52 4.22-.69 0-1.33-.36-1.55-.78l-.42 1.6c-.15.58-.56 1.31-.83 1.75A10 10 0 1 0 12 2z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <div class="f-title">Shop</div>
+        <div class="f-links"><a href="{% url 'shop' %}">All Products</a><a href="{% url 'shop' %}">Whitening Soaps</a><a href="{% url 'shop' %}">Black Soaps</a></div>
+      </div>
+      <div>
+        <div class="f-title">About</div>
+        <div class="f-links"><a href="{% url 'our-story' %}">Our Story</a><a href="#">Our Ingredients</a><a href="#">Skin Tips</a><a href="#">Wholesale</a><a href="#">Become a Distributor</a></div>
+      </div>
+      <div>
+        <div class="f-title">Help</div>
+        <div class="f-links"><a href="#">Contact Us</a><a href="#">Shipping &amp; Returns</a><a href="#">FAQ</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Arikey Skincare. All rights reserved.</span>
+      <div class="pay-icons"><span>Free shipping over ₦30,000</span><span>VISA</span><span>MC</span><span>PayPal</span></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- FAQ data ---------------- */
+  var faqs = [
+    { q:"Are Arikey Skincare products safe for all skin types?", a:"Yes. Every Arikey formula is dermatologist tested and made with melanin-rich skin in mind. That said, we always recommend a small patch test before first use, especially if you have sensitive skin or known allergies to any listed ingredient." },
+    { q:"Do you test on animals?", a:"Never. Arikey Skincare is proudly cruelty-free. We test every formula on real volunteers, not animals, and we never work with suppliers who conduct animal testing on our behalf." },
+    { q:"What is your return policy?", a:"Unopened products can be returned within 14 days of delivery for a full refund. If a product arrives damaged or isn't what you ordered, reach out within 7 days and we'll replace it or refund you, no questions asked." },
+    { q:"How long does shipping take?", a:"Orders within Lagos typically arrive in 1-2 business days. Other states across Nigeria take 3-5 business days. Pan-African orders (Ghana, Kenya, South Africa) generally take 7-10 business days depending on customs." },
+    { q:"Can I use both Molato Soap and Healing Black Soap together?", a:"Absolutely — many customers alternate between the two. We recommend using the Healing Black Soap in the morning for a gentle cleanse and the 5D Whitening Molato Soap at night to let the whitening actives work while you sleep." },
+    { q:"How long before I see results?", a:"Most customers notice softer, more even-toned skin within 2-3 weeks of consistent use. Visible brightening and fading of dark spots typically becomes noticeable around the 4-6 week mark, with continued improvement over 3 months." }
+  ];
+
+  var faqList = document.getElementById("faqList");
+  faqList.innerHTML = faqs.map(function(f, i){
+    return (
+      '<div class="faq-item" data-index="'+i+'">' +
+        '<button class="faq-q" aria-expanded="false">' +
+          '<span>'+f.q+'</span>' +
+          '<span class="plus"></span>' +
+        '</button>' +
+        '<div class="faq-a"><div class="faq-a-inner">'+f.a+'</div></div>' +
+      '</div>'
+    );
+  }).join("");
+
+  faqList.addEventListener("click", function(e){
+    var btn = e.target.closest(".faq-q");
+    if(!btn) return;
+    var item = btn.closest(".faq-item");
+    var answer = item.querySelector(".faq-a");
+    var isOpen = item.classList.contains("open");
+
+    /* close all */
+    faqList.querySelectorAll(".faq-item.open").forEach(function(openItem){
+      openItem.classList.remove("open");
+      openItem.querySelector(".faq-q").setAttribute("aria-expanded","false");
+      openItem.querySelector(".faq-a").style.maxHeight = null;
+    });
+
+    if(!isOpen){
+      item.classList.add("open");
+      btn.setAttribute("aria-expanded","true");
+      answer.style.maxHeight = answer.scrollHeight + "px";
+    }
+  });
+
+  /* ---------------- Contact form ---------------- */
+  var form = document.getElementById("contactForm");
+  var messageEl = document.getElementById("message");
+  var charCount = document.getElementById("charCount");
+  var formSuccess = document.getElementById("formSuccess");
+  var submitBtn = document.getElementById("submitBtn");
+
+  messageEl.addEventListener("input", function(){
+    charCount.textContent = messageEl.value.length;
+  });
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(!form.checkValidity()){
+      form.reportValidity();
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+    setTimeout(function(){
+      formSuccess.style.display = "block";
+      form.reset();
+      charCount.textContent = "0";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send Message";
+      setTimeout(function(){ formSuccess.style.display = "none"; }, 6000);
+    }, 700);
+  });
+
+  /* ---------------- Header solid on scroll ---------------- */
+  var header = document.getElementById("siteHeader");
+  function onScroll(){
+    header.classList.toggle("solid", window.scrollY > 40);
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  /* ---------------- Mobile menu ---------------- */
+  var menuToggle = document.getElementById("menuToggle");
+  var mobileMenu = document.getElementById("mobileMenu");
+  var mobileClose = document.getElementById("mobileClose");
+  function openMenu(){ mobileMenu.classList.add("open"); document.body.style.overflow="hidden"; }
+  function closeMenu(){ mobileMenu.classList.remove("open"); document.body.style.overflow=""; }
+  menuToggle.addEventListener("click", openMenu);
+  mobileClose.addEventListener("click", closeMenu);
+  mobileMenu.querySelectorAll("a").forEach(function(a){ a.addEventListener("click", closeMenu); });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+})();
+
+  /* ---------- Shared bag count ---------- */
+  (function(){
+    var badge = document.getElementById("cartCount");
+    if(!badge) return;
+    try{
+      var bag = JSON.parse(localStorage.getItem("arikeyBag") || "[]");
+      var total = bag.reduce(function(sum,item){ return sum + (item.qty || 0); }, 0);
+      badge.textContent = total;
+    }catch(e){
+      badge.textContent = "0";
+    }
+  })();
+
+</script>
+</body>
+</html>

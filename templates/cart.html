@@ -1,0 +1,876 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Bag — Arikey Skincare</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#faf6ef;
+    --cream-2:#f3ede1;
+    --ink:#1c1410;
+    --ink-soft:#6c5d53;
+    --coral:#d1495b;
+    --coral-dark:#b83a4b;
+    --line:rgba(28,20,16,.11);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Jost',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Playfair Display',serif;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  img{display:block;max-width:100%;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 40px;}
+  .eyebrow{letter-spacing:.18em;font-size:.68rem;font-weight:600;text-transform:uppercase;color:var(--coral);}
+
+  /* ---------- NAVBAR ---------- */
+  header{
+    position:sticky;top:0;z-index:100;height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+  .header-inner{
+    height:62px;display:flex;align-items:center;justify-content:space-between;
+    padding:8px 40px;max-width:1280px;margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:700;}
+  .brand-logo{width:38px;height:38px;object-fit:contain;flex:0 0 38px;}
+  nav.navlinks{display:flex;gap:38px;}
+  .navlink{
+    font-size:.8rem;letter-spacing:.1em;font-weight:500;text-transform:uppercase;
+    position:relative;padding-bottom:4px;
+  }
+  .navlink::after{
+    content:'';position:absolute;left:0;bottom:0;width:0;height:1px;
+    background:currentColor;transition:width .3s ease;
+  }
+  .navlink:hover::after{width:100%;}
+  .cart-btn{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    width:34px;height:34px;color:var(--ink);
+  }
+  .cart-btn svg{width:19px;height:19px;stroke:currentColor;}
+  .cart-badge{
+    position:absolute;top:-2px;right:-2px;background:var(--coral);color:#fff;
+    width:16px;height:16px;border-radius:50%;font-size:.62rem;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .menu-toggle{display:none;width:24px;height:18px;position:relative;border:0;background:transparent;}
+  .menu-toggle span{position:absolute;left:0;width:100%;height:2px;background:var(--ink);}
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--ink);z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+    opacity:0;visibility:hidden;transform:translateY(-10px);transition:.3s ease;
+  }
+  .mobile-menu.open{opacity:1;visibility:visible;transform:none;}
+  .mobile-menu a{color:#fff;font-family:'Playfair Display',serif;font-size:1.2rem;}
+  .mobile-close{
+    position:absolute;top:24px;right:24px;border:0;background:transparent;
+    color:#fff;font-size:1.8rem;
+  }
+
+  /* ---------- CART ---------- */
+  .bag-head{
+    text-align:center;
+    padding:34px 20px 24px;
+  }
+  .bag-head h1{
+    font-size:clamp(2rem,4vw,3rem);
+    font-weight:600;
+    margin:8px 0 6px;
+  }
+  .bag-head p{
+    color:var(--ink-soft);
+    font-size:.9rem;
+  }
+
+  .bag-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1.65fr) minmax(270px,.75fr);
+    gap:28px;
+    align-items:start;
+    padding:18px 0 52px;
+  }
+
+  .bag-items{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .bag-item{
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:14px;
+    display:grid;
+    grid-template-columns:96px minmax(0,1fr) auto;
+    gap:15px;
+    align-items:center;
+    background:rgba(255,255,255,.22);
+  }
+
+  .item-image{
+    width:96px;height:96px;border-radius:6px;overflow:hidden;
+    background:var(--cream-2);
+  }
+  .item-image img{
+    width:100%;height:100%;object-fit:cover;
+  }
+
+  .item-info{min-width:0;}
+  .item-name{
+    font-family:'Playfair Display',serif;
+    font-weight:600;
+    font-size:1rem;
+    line-height:1.25;
+    margin-bottom:5px;
+  }
+  .item-price{
+    font-family:'Playfair Display',serif;
+    font-weight:700;
+    font-size:.92rem;
+    margin-bottom:11px;
+  }
+
+  .item-bottom{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .qty{
+    width:112px;height:38px;
+    display:grid;grid-template-columns:1fr 1fr 1fr;
+    align-items:center;border:1px solid var(--line);
+    border-radius:5px;background:#fffaf3;
+  }
+  .qty button{
+    height:100%;border:0;background:transparent;
+    color:var(--ink-soft);font-size:1rem;
+  }
+  .qty span{
+    text-align:center;font-size:.78rem;font-weight:600;
+  }
+
+  .line-total{
+    font-size:.76rem;color:var(--ink-soft);
+  }
+
+  .remove-btn{
+    width:38px;height:38px;border:0;background:transparent;
+    color:#9d9188;display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+  }
+  .remove-btn:hover{background:var(--cream-2);color:var(--coral);}
+  .remove-btn svg{width:18px;height:18px;stroke:currentColor;}
+
+  /* ---------- SUMMARY ---------- */
+  .summary{
+    background:var(--cream-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:22px;
+    position:sticky;
+    top:82px;
+  }
+  .summary h2{
+    font-size:1.3rem;
+    margin-bottom:20px;
+  }
+  .summary-row{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;font-size:.84rem;margin-bottom:13px;
+  }
+  .summary-row span:first-child{color:var(--ink-soft);}
+  .summary-row strong{font-size:.84rem;}
+  .shipping-note{
+    font-size:.72rem;color:var(--ink-soft);
+    line-height:1.45;margin:5px 0 15px;
+  }
+  .summary-total{
+    border-top:1px solid var(--line);
+    padding-top:16px;margin-top:15px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'Playfair Display',serif;
+    font-weight:700;font-size:1.1rem;
+  }
+
+  .checkout-btn{
+    width:100%;height:46px;margin-top:20px;
+    border:0;border-radius:6px;background:var(--coral);color:#fff;
+    font-size:.82rem;font-weight:600;
+  }
+  .checkout-btn:hover{background:var(--coral-dark);}
+  .checkout-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .continue{
+    display:block;text-align:center;
+    margin-top:14px;font-size:.78rem;color:var(--ink-soft);
+  }
+  .continue:hover{color:var(--coral);}
+
+  .checkout-note{
+    text-align:center;
+    font-size:.7rem;
+    color:var(--ink-soft);
+    margin-top:8px;
+    min-height:16px;
+  }
+
+  /* ---------- EMPTY ---------- */
+  .empty-state{
+    display:none;
+    text-align:center;
+    padding:56px 20px 70px;
+  }
+  .empty-state h2{
+    font-size:1.55rem;
+    margin-bottom:8px;
+  }
+  .empty-state p{
+    color:var(--ink-soft);
+    font-size:.85rem;
+    margin-bottom:20px;
+  }
+  .empty-state a{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:42px;padding:0 20px;border-radius:5px;
+    background:var(--coral);color:#fff;font-size:.78rem;font-weight:600;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{background:#170f0c;color:rgba(255,255,255,.7);padding:42px 0 0;}
+  .footer-grid{
+    display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;
+    gap:28px;padding-bottom:30px;
+  }
+  .footer-logo{
+    font-family:'Playfair Display',serif;
+    font-size:1.18rem;font-weight:700;color:#fff;margin-bottom:10px;
+  }
+  .footer-desc{
+    font-size:.78rem;line-height:1.55;margin-bottom:16px;max-width:320px;
+  }
+  .f-title{
+    color:#fff;font-size:.68rem;letter-spacing:.14em;font-weight:600;
+    text-transform:uppercase;margin-bottom:12px;
+  }
+  .f-links{display:flex;flex-direction:column;gap:8px;}
+  .f-links a{font-size:.78rem;}
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,.1);
+    padding:16px 0;display:flex;justify-content:space-between;
+    align-items:center;flex-wrap:wrap;gap:12px;
+    font-size:.72rem;color:rgba(255,255,255,.5);
+  }
+  .pay-icons{display:flex;gap:8px;flex-wrap:wrap;}
+  .pay-icons span{
+    border:1px solid rgba(255,255,255,.18);
+    padding:3px 7px;border-radius:3px;font-size:.62rem;
+  }
+
+  /* ---------- MOBILE ---------- */
+  @media(max-width:860px){
+    .bag-layout{grid-template-columns:1fr;}
+    .summary{position:static;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+  }
+
+  @media(max-width:720px){
+    .wrap{padding:0 16px;}
+    .header-inner{height:62px;padding:8px 16px;}
+    nav.navlinks{display:none;}
+    .menu-toggle{display:block;}
+    .logo{font-size:1rem;gap:7px;}
+
+    .bag-head{padding:22px 16px 14px;}
+    .bag-head h1{font-size:1.8rem;}
+    .bag-head p{font-size:.78rem;}
+
+    .bag-layout{
+      padding:10px 0 34px;
+      gap:16px;
+    }
+
+    .bag-item{
+      grid-template-columns:76px minmax(0,1fr) 32px;
+      gap:10px;
+      padding:10px;
+    }
+    .item-image{width:76px;height:76px;}
+    .item-name{font-size:.88rem;margin-bottom:4px;}
+    .item-price{font-size:.82rem;margin-bottom:8px;}
+    .qty{width:94px;height:34px;}
+    .qty button{font-size:.9rem;}
+    .qty span{font-size:.72rem;}
+    .line-total{font-size:.68rem;}
+    .remove-btn{width:32px;height:32px;}
+    .remove-btn svg{width:16px;height:16px;}
+
+    .summary{padding:16px;}
+    .summary h2{font-size:1.1rem;margin-bottom:15px;}
+    .summary-row{font-size:.78rem;margin-bottom:10px;}
+    .summary-row strong{font-size:.78rem;}
+    .shipping-note{font-size:.68rem;margin-bottom:12px;}
+    .summary-total{font-size:1rem;padding-top:13px;margin-top:12px;}
+    .checkout-btn{height:42px;font-size:.76rem;margin-top:16px;}
+    .continue{font-size:.72rem;}
+
+    .footer-grid{grid-template-columns:1fr;gap:20px;}
+  }
+
+  @media(max-width:390px){
+    .bag-item{
+      grid-template-columns:70px minmax(0,1fr) 30px;
+      gap:8px;
+    }
+    .item-image{width:70px;height:70px;}
+    .qty{width:88px;}
+  }
+
+  /* ---------- UNIFIED NAVBAR ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:62px;
+    background:rgba(250,246,239,.94);
+    backdrop-filter:blur(10px);
+    box-shadow:0 1px 0 var(--line);
+  }
+
+  .header-inner{
+    height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 40px;
+    max-width:1280px;
+    margin:0 auto;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.2rem;
+    font-weight:700;
+    letter-spacing:.01em;
+    min-width:0;
+  }
+
+  .brand-logo{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    display:block;
+    flex:0 0 38px;
+  }
+
+  .logo-text{
+    white-space:nowrap;
+  }
+
+  nav.navlinks{
+    display:flex;
+    gap:38px;
+  }
+
+  .navlink{
+    font-size:.8rem;
+    letter-spacing:.1em;
+    font-weight:500;
+    text-transform:uppercase;
+    position:relative;
+    padding-bottom:4px;
+    color:var(--ink);
+  }
+
+  .navlink.active{
+    color:var(--coral);
+  }
+
+  .navlink::after{
+    content:'';
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:0;
+    height:1px;
+    background:currentColor;
+    transition:width .3s ease;
+  }
+
+  .navlink:hover::after{
+    width:100%;
+  }
+
+  .cart-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    color:var(--ink);
+    border:none;
+    background:transparent;
+    padding:0;
+  }
+
+  .cart-btn svg{
+    width:19px;
+    height:19px;
+    stroke:currentColor;
+  }
+
+  .cart-badge{
+    position:absolute;
+    top:-2px;
+    right:-2px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--coral);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.62rem;
+    font-weight:600;
+  }
+
+  .menu-toggle{
+    display:none;
+    width:24px;
+    height:18px;
+    position:relative;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+  }
+
+  .menu-toggle span{
+    position:absolute;
+    left:0;
+    width:100%;
+    height:2px;
+    background:currentColor;
+  }
+
+  .menu-toggle span:nth-child(1){top:0;}
+  .menu-toggle span:nth-child(2){top:8px;}
+  .menu-toggle span:nth-child(3){top:16px;}
+
+  .mobile-menu{
+    position:fixed;
+    inset:0;
+    background:var(--ink);
+    z-index:200;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:30px;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:.3s ease;
+  }
+
+  .mobile-menu.open{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+
+  .mobile-menu a{
+    color:#fff;
+    font-size:1.2rem;
+    font-family:'Playfair Display',serif;
+  }
+
+  .mobile-close{
+    position:absolute;
+    top:24px;
+    right:24px;
+    width:32px;
+    height:32px;
+    border:none;
+    background:transparent;
+    color:#fff;
+    font-size:1.8rem;
+  }
+
+  @media(max-width:720px){
+    .header-inner{
+      padding:8px 16px;
+    }
+
+    .logo{
+      gap:7px;
+      font-size:1rem;
+    }
+
+    .brand-logo{
+      width:38px;
+      height:38px;
+      flex-basis:38px;
+    }
+
+    nav.navlinks{
+      display:none;
+    }
+
+    .menu-toggle{
+      display:block;
+    }
+  }
+
+  @media(max-width:360px){
+    .logo-text{
+      font-size:.92rem;
+    }
+
+    .header-inner{
+      padding-left:12px;
+      padding-right:12px;
+    }
+  }
+
+
+  /* ---------- CART MOBILE REFINEMENT ---------- */
+  @media(max-width:720px){
+    .wrap{padding:0 16px;}
+    .bag-head{padding:20px 16px 12px;}
+    .bag-head h1{font-size:1.65rem;}
+    .bag-head p{font-size:.74rem;}
+    .bag-layout{padding:8px 0 28px;gap:14px;}
+    .bag-item{
+      grid-template-columns:68px minmax(0,1fr) 30px;
+      gap:8px;
+      padding:9px;
+    }
+    .item-image{width:68px;height:68px;}
+    .item-name{font-size:.82rem;}
+    .item-price{font-size:.76rem;margin-bottom:6px;}
+    .qty{width:86px;height:32px;}
+    .qty button{font-size:.84rem;}
+    .qty span{font-size:.68rem;}
+    .line-total{font-size:.64rem;}
+    .summary{padding:14px;}
+    .summary h2{font-size:1.05rem;}
+    .summary-row,.summary-row strong{font-size:.74rem;}
+    .shipping-note{font-size:.64rem;}
+    .summary-total{font-size:.95rem;}
+    .checkout-btn{height:40px;font-size:.72rem;}
+    footer{padding-top:34px;}
+    .footer-grid{grid-template-columns:1fr;gap:18px;padding-bottom:22px;}
+  }
+
+</style>
+</head>
+
+<body>
+
+<header id="siteHeader">
+  <div class="header-inner">
+    <a href="{% url 'home-page' %}" class="logo" aria-label="Arikey Skincare Home">
+      <img src="{% static 'images/logo.png' %}" alt="Arikey Skincare logo" class="brand-logo">
+      <span class="logo-text">Arikey Skincare</span>
+    </a>
+
+    <nav class="navlinks">
+      <a class="navlink" href="{% url 'home-page' %}">Home</a>
+      <a class="navlink" href="{% url 'shop' %}">Shop</a>
+      <a class="navlink" href="{% url 'our-story' %}">Our Story</a>
+      <a class="navlink" href="{% url 'contact' %}">Contact</a>
+    </nav>
+
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a class="cart-btn" id="cartBtn" href="{% url 'cart' %}" aria-label="Shopping bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
+        <span class="cart-badge" id="cartCount">0</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="mobileClose" aria-label="Close menu">&times;</button>
+  <a href="{% url 'home-page' %}">Home</a>
+  <a href="{% url 'shop' %}">Shop</a>
+  <a href="{% url 'our-story' %}">Our Story</a>
+  <a href="{% url 'contact' %}">Contact</a>
+</div>
+
+<main>
+  <section class="bag-head">
+    <span class="eyebrow">Your Selection</span>
+    <h1>Shopping Bag</h1>
+    <p id="bagIntro">Your selected products are waiting for you.</p>
+  </section>
+
+  <section class="wrap">
+    <div class="bag-layout" id="bagLayout">
+      <div class="bag-items" id="bagItems"></div>
+
+      <aside class="summary">
+        <h2>Order Summary</h2>
+
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <strong id="subtotal">₦0</strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Shipping</span>
+          <strong id="shipping">₦0</strong>
+        </div>
+
+        <p class="shipping-note" id="shippingNote"></p>
+
+        <div class="summary-total">
+          <span>Total</span>
+          <span id="total">₦0</span>
+        </div>
+
+        <a class="checkout-btn" id="checkoutBtn" href="{% url 'checkout' %}" style="display:flex;align-items:center;justify-content:center;">Proceed to Checkout →</a>
+        <a class="continue" href="{% url 'shop' %}">Continue Shopping</a>
+        <div class="checkout-note" id="checkoutNote"></div>
+      </aside>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <h2>Your bag is empty</h2>
+      <p>Add a product from the shop and it will appear here.</p>
+      <a href="{% url 'shop' %}">Shop Products</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Arikey Skincare</div>
+        <p class="footer-desc">Premium skincare crafted for radiant-looking, well-cared-for skin. Build a routine that feels simple and consistent.</p>
+      </div>
+
+      <div>
+        <div class="f-title">Shop</div>
+        <div class="f-links">
+          <a href="{% url 'shop' %}">All Products</a>
+          <a href="{% url 'shop' %}">Whitening Soaps</a>
+          <a href="{% url 'shop' %}">Black Soaps</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="f-title">About</div>
+        <div class="f-links">
+          <a href="{% url 'our-story' %}">Our Story</a>
+          <a href="#">Our Ingredients</a>
+          <a href="#">Skin Tips</a>
+          <a href="#">Wholesale</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="f-title">Help</div>
+        <div class="f-links">
+          <a href="{% url 'contact' %}">Contact Us</a>
+          <a href="#">Shipping &amp; Returns</a>
+          <a href="#">FAQ</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> Arikey Skincare. All rights reserved.</span>
+      <div class="pay-icons"><span>Free shipping over ₦30,000</span><span>VISA</span><span>MC</span><span>PayPal</span></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var SHIPPING_FEE = 2500;
+  var FREE_SHIPPING_MIN = 30000;
+
+  function naira(n){
+    return "₦" + Number(n).toLocaleString("en-NG");
+  }
+
+  function getBag(){
+    try{
+      return JSON.parse(localStorage.getItem("arikeyBag") || "[]");
+    }catch(e){
+      return [];
+    }
+  }
+
+  function saveBag(bag){
+    localStorage.setItem("arikeyBag", JSON.stringify(bag));
+  }
+
+  var bagItems = document.getElementById("bagItems");
+  var emptyState = document.getElementById("emptyState");
+  var bagLayout = document.getElementById("bagLayout");
+  var cartCount = document.getElementById("cartCount");
+  var bagIntro = document.getElementById("bagIntro");
+  var subtotalEl = document.getElementById("subtotal");
+  var shippingEl = document.getElementById("shipping");
+  var shippingNote = document.getElementById("shippingNote");
+  var totalEl = document.getElementById("total");
+  var checkoutBtn = document.getElementById("checkoutBtn");
+  var checkoutNote = document.getElementById("checkoutNote");
+
+  function render(){
+    var bag = getBag().filter(function(item){
+      return item && item.id && item.qty > 0;
+    });
+
+    saveBag(bag);
+
+    var itemCount = bag.reduce(function(sum,item){ return sum + item.qty; },0);
+    var subtotal = bag.reduce(function(sum,item){ return sum + (item.price * item.qty); },0);
+    var shipping = itemCount === 0 ? 0 : (subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING_FEE);
+    var total = subtotal + shipping;
+
+    cartCount.textContent = itemCount;
+
+    if(itemCount === 0){
+      bagLayout.style.display = "none";
+      emptyState.style.display = "block";
+      bagIntro.textContent = "Your bag is currently empty.";
+      
+      return;
+    }
+
+    bagLayout.style.display = "grid";
+    emptyState.style.display = "none";
+    
+
+    bagIntro.textContent = itemCount + (itemCount === 1 ? " item in your bag." : " items in your bag.");
+
+    bagItems.innerHTML = bag.map(function(item){
+      return (
+        '<article class="bag-item" data-id="'+item.id+'">' +
+          '<a class="item-image" href="{% url 'product-details' %}?id='+item.id+'">' +
+            '<img src="'+item.image+'" alt="'+item.name+'">' +
+          '</a>' +
+
+          '<div class="item-info">' +
+            '<a class="item-name" href="{% url 'product-details' %}?id='+item.id+'">'+item.name+'</a>' +
+            '<div class="item-price">'+naira(item.price)+'</div>' +
+
+            '<div class="item-bottom">' +
+              '<div class="qty">' +
+                '<button type="button" class="minus" aria-label="Decrease quantity">−</button>' +
+                '<span>'+item.qty+'</span>' +
+                '<button type="button" class="plus" aria-label="Increase quantity">+</button>' +
+              '</div>' +
+              '<span class="line-total">'+naira(item.price * item.qty)+'</span>' +
+            '</div>' +
+          '</div>' +
+
+          '<button type="button" class="remove-btn" aria-label="Remove '+item.name+'">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 10v6M14 10v6"/>' +
+            '</svg>' +
+          '</button>' +
+        '</article>'
+      );
+    }).join("");
+
+    subtotalEl.textContent = naira(subtotal);
+    shippingEl.textContent = shipping === 0 ? "FREE" : naira(shipping);
+    totalEl.textContent = naira(total);
+
+    if(subtotal >= FREE_SHIPPING_MIN){
+      shippingNote.textContent = "You qualify for free shipping.";
+    }else{
+      shippingNote.textContent = "Add " + naira(FREE_SHIPPING_MIN - subtotal) + " more to unlock free shipping.";
+    }
+  }
+
+  bagItems.addEventListener("click", function(e){
+    var card = e.target.closest(".bag-item");
+    if(!card) return;
+
+    var id = parseInt(card.dataset.id,10);
+    var bag = getBag();
+    var item = bag.find(function(x){ return x.id === id; });
+    if(!item) return;
+
+    if(e.target.closest(".minus")){
+      item.qty = Math.max(1, item.qty - 1);
+      saveBag(bag);
+      render();
+      return;
+    }
+
+    if(e.target.closest(".plus")){
+      item.qty = Math.min(10, item.qty + 1);
+      saveBag(bag);
+      render();
+      return;
+    }
+
+    if(e.target.closest(".remove-btn")){
+      bag = bag.filter(function(x){ return x.id !== id; });
+      saveBag(bag);
+      render();
+    }
+  });
+var menuToggle = document.getElementById("menuToggle");
+  var mobileMenu = document.getElementById("mobileMenu");
+  var mobileClose = document.getElementById("mobileClose");
+
+  menuToggle.addEventListener("click", function(){
+    mobileMenu.classList.add("open");
+    document.body.style.overflow = "hidden";
+  });
+
+  mobileClose.addEventListener("click", function(){
+    mobileMenu.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+
+  mobileMenu.querySelectorAll("a").forEach(function(a){
+    a.addEventListener("click", function(){
+      mobileMenu.classList.remove("open");
+      document.body.style.overflow = "";
+    });
+  });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+  render();
+})();
+</script>
+
+</body>
+</html>
