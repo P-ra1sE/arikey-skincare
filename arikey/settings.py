@@ -48,9 +48,13 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     ".vercel.app",
+    "arikeyskincare.com.ng",
+    "www.arikeyskincare.com.ng",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
+    "https://arikeyskincare.com.ng",
+    "https://www.arikeyskincare.com.ng",
 ]
 
 if not DEBUG:
