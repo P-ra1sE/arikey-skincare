@@ -1,21 +1,24 @@
-import json
-import uuid
-import requests
 import hashlib
 import hmac
-
+import json
+import uuid
 from decimal import Decimal
 from urllib.parse import quote
 
+import requests
+
 from django.conf import settings
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect
-from django.views.decorators.http import require_POST
+from django.db.models import Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-from .models import Product, Order, OrderItem
+from .forms import CheckoutForm
+from .models import DeliveryLocation, Order, OrderItem, Product
+from .services import calculate_cart
 
 
 # =========================================================
@@ -47,7 +50,201 @@ def cart(request):
 
 
 def checkout(request):
-    return render(request, "checkout.html")
+    countries = (
+        DeliveryLocation.objects
+        .filter(is_active=True)
+        .values_list("country", flat=True)
+        .distinct()
+        .order_by("country")
+    )
+
+    return render(
+        request,
+        "checkout.html",
+        {
+            "delivery_countries": countries,
+        },
+    )
+
+
+# =========================================================
+# DELIVERY LOCATION APIS
+# =========================================================
+
+def delivery_countries(request):
+    countries = (
+        DeliveryLocation.objects
+        .filter(is_active=True)
+        .values_list("country", flat=True)
+        .distinct()
+        .order_by("country")
+    )
+
+    return JsonResponse({
+        "success": True,
+        "countries": list(countries),
+    })
+
+
+def delivery_states(request):
+    country = request.GET.get("country", "").strip()
+
+    if not country:
+        return JsonResponse({
+            "success": True,
+            "states": [],
+        })
+
+    states = (
+        DeliveryLocation.objects
+        .filter(
+            country__iexact=country,
+            is_active=True,
+        )
+        .values_list("state_region", flat=True)
+        .distinct()
+        .order_by("state_region")
+    )
+
+    return JsonResponse({
+        "success": True,
+        "states": list(states),
+    })
+
+
+def delivery_locations(request):
+    country = request.GET.get("country", "").strip()
+    state = request.GET.get("state", "").strip()
+    search = request.GET.get("q", "").strip()
+
+    if not country or not state:
+        return JsonResponse({
+            "success": True,
+            "locations": [],
+        })
+
+    locations = DeliveryLocation.objects.filter(
+        country__iexact=country,
+        state_region__iexact=state,
+        is_active=True,
+    )
+
+    if search:
+        locations = locations.filter(
+            Q(city_area__icontains=search)
+            | Q(landmark__icontains=search)
+        )
+
+    locations = locations.order_by(
+        "city_area",
+        "landmark",
+    )[:40]
+
+    data = []
+
+    for location in locations:
+        if (
+            location.delivery_type == "fixed"
+            and location.fee is not None
+        ):
+            fee = float(location.fee)
+            fee_message = f"₦{location.fee:,.0f} — Pay on delivery"
+        else:
+            fee = None
+            fee_message = "Delivery fee to be confirmed on WhatsApp"
+
+        label = f"{location.city_area}, {location.state_region}"
+
+        if location.landmark:
+            label += f" — {location.landmark}"
+
+        data.append({
+            "id": location.id,
+            "country": location.country,
+            "state_region": location.state_region,
+            "city_area": location.city_area,
+            "landmark": location.landmark,
+            "label": label,
+            "delivery_type": location.delivery_type,
+            "fee": fee,
+            "fee_message": fee_message,
+        })
+
+    return JsonResponse({
+        "success": True,
+        "locations": data,
+    })
+
+
+# =========================================================
+# CHECKOUT QUOTE
+# =========================================================
+
+@require_POST
+def checkout_quote(request):
+    try:
+        data = json.loads(request.body)
+
+        items = data.get("items", [])
+        location_id = data.get("delivery_location")
+
+        delivery_location = DeliveryLocation.objects.get(
+            id=location_id,
+            is_active=True,
+        )
+
+        if (
+            delivery_location.delivery_type == "fixed"
+            and delivery_location.fee is None
+        ):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": (
+                        "The delivery fee for this location "
+                        "has not been configured yet."
+                    ),
+                },
+                status=400,
+            )
+
+        quote_data = calculate_cart(items)
+
+    except (
+        ValueError,
+        KeyError,
+        Product.DoesNotExist,
+        DeliveryLocation.DoesNotExist,
+        TypeError,
+        json.JSONDecodeError,
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Unable to calculate order.",
+            },
+            status=400,
+        )
+
+    if delivery_location.delivery_type == "fixed":
+        delivery_fee = float(delivery_location.fee)
+        delivery_message = "Pay on delivery"
+    else:
+        delivery_fee = None
+        delivery_message = "Delivery fee to be confirmed on WhatsApp"
+
+    return JsonResponse(
+        {
+            "success": True,
+            "subtotal": float(quote_data["subtotal"]),
+            "processing_fee": float(quote_data["processing_fee"]),
+            "online_total": float(quote_data["online_total"]),
+            "delivery_location": delivery_location.id,
+            "delivery_type": delivery_location.delivery_type,
+            "delivery_fee": delivery_fee,
+            "delivery_message": delivery_message,
+        }
+    )
 
 
 # =========================================================
@@ -56,447 +253,279 @@ def checkout(request):
 
 @require_POST
 def create_order(request):
-
     try:
         data = json.loads(request.body)
-
     except json.JSONDecodeError:
         return JsonResponse(
             {
                 "success": False,
-                "error": "Invalid request data."
+                "error": "Invalid checkout data.",
             },
-            status=400
+            status=400,
         )
 
+    form = CheckoutForm(data)
 
-    # -----------------------------------------------------
-    # VALIDATE CUSTOMER INFORMATION
-    # -----------------------------------------------------
-
-    required_fields = [
-        "first_name",
-        "last_name",
-        "email",
-        "address",
-        "city",
-        "state",
-        "zip",
-        "country",
-    ]
-
-
-    for field in required_fields:
-
-        value = str(
-            data.get(field, "")
-        ).strip()
-
-        if not value:
-
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": (
-                        field
-                        .replace("_", " ")
-                        .title()
-                        + " is required."
-                    )
-                },
-                status=400
-            )
-
-
-    # -----------------------------------------------------
-    # ORDER METHOD
-    # -----------------------------------------------------
-
-    order_method = data.get(
-        "order_method",
-        "paystack"
-    )
-
-
-    if order_method not in [
-        "paystack",
-        "whatsapp"
-    ]:
-
+    if not form.is_valid():
         return JsonResponse(
             {
                 "success": False,
-                "error": "Invalid order method."
+                "errors": form.errors.get_json_data(),
             },
-            status=400
+            status=400,
         )
 
+    order_method = data.get("order_method", "paystack")
 
-    # -----------------------------------------------------
-    # CART ITEMS
-    # -----------------------------------------------------
+    if order_method not in ("paystack", "whatsapp"):
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Invalid order method.",
+            },
+            status=400,
+        )
 
-    items = data.get(
-        "items",
-        []
-    )
-
+    items = data.get("items", [])
 
     if not isinstance(items, list) or not items:
-
         return JsonResponse(
             {
                 "success": False,
-                "error": "Your shopping bag is empty."
+                "error": "Your shopping bag is empty.",
             },
-            status=400
+            status=400,
         )
 
-
-    checked_items = []
-
-    subtotal = Decimal(
-        "0.00"
-    )
-
-
-    # -----------------------------------------------------
-    # VALIDATE PRODUCTS USING DJANGO DATABASE
-    # -----------------------------------------------------
-
-    for item in items:
-
-        try:
-
-            product_id = int(
-                item.get("id")
-            )
-
-            quantity = int(
-                item.get("quantity")
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": "Invalid product information."
-                },
-                status=400
-            )
-
-
-        # Quantity safety check
-
-        if quantity < 1 or quantity > 10:
-
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": "Invalid product quantity."
-                },
-                status=400
-            )
-
-
-        # Get actual product from Django database
-
-        try:
-
-            product = Product.objects.get(
-                id=product_id,
-                is_active=True
-            )
-
-        except Product.DoesNotExist:
-
-            return JsonResponse(
-                {
-                    "success": False,
-                    "error": (
-                        f"Product {product_id} "
-                        "is unavailable."
-                    )
-                },
-                status=400
-            )
-
-
-        # Django calculates price.
-        # We do NOT trust prices from JavaScript.
-
-        subtotal += (
-            product.price
-            * quantity
-        )
-
-
-        checked_items.append(
+    try:
+        cart_data = calculate_cart(items)
+    except (
+        ValueError,
+        Product.DoesNotExist,
+        KeyError,
+        TypeError,
+    ):
+        return JsonResponse(
             {
-                "product": product,
-                "quantity": quantity
-            }
+                "success": False,
+                "error": "One or more products in your bag are invalid.",
+            },
+            status=400,
         )
 
+    delivery_location = form.cleaned_data["delivery_location"]
 
-    # -----------------------------------------------------
-    # SHIPPING CALCULATION
-    # -----------------------------------------------------
-
-    if subtotal >= Decimal("30000.00"):
-
-        shipping = Decimal(
-            "0.00"
+    if (
+        delivery_location.delivery_type == "fixed"
+        and delivery_location.fee is None
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "error": (
+                    "The delivery fee for this location "
+                    "has not been configured yet."
+                ),
+            },
+            status=400,
         )
 
+    order_number = "ARIKEY-" + uuid.uuid4().hex[:10].upper()
+
+    if order_method == "paystack":
+        reference = "PAY-" + uuid.uuid4().hex[:16].upper()
     else:
+        reference = "WA-" + uuid.uuid4().hex[:16].upper()
 
-        shipping = Decimal(
-            "2500.00"
-        )
+    subtotal = cart_data["subtotal"]
 
-
-    total = (
-        subtotal
-        + shipping
-    )
-
-
-    # -----------------------------------------------------
-    # CREATE UNIQUE ORDER REFERENCE
-    # -----------------------------------------------------
-
-    reference = (
-        "ARIKEY-"
-        + uuid.uuid4()
-        .hex[:12]
-        .upper()
-    )
-
-
-    # -----------------------------------------------------
-    # ORDER CHANNEL
-    # -----------------------------------------------------
-
-    if order_method == "whatsapp":
-
-        order_channel = "whatsapp"
-
+    if delivery_location.delivery_type == "fixed":
+        delivery_fee = delivery_location.fee
     else:
+        delivery_fee = Decimal("0.00")
 
-        order_channel = "website"
-
-
-    # -----------------------------------------------------
-    # CREATE ORDER AND ORDER ITEMS
-    # -----------------------------------------------------
+    if order_method == "paystack":
+        processing_fee = cart_data["processing_fee"]
+        total = cart_data["online_total"]
+    else:
+        processing_fee = Decimal("0.00")
+        total = subtotal
 
     with transaction.atomic():
-
         order = Order.objects.create(
-
-            first_name=
-                data["first_name"].strip(),
-
-            last_name=
-                data["last_name"].strip(),
-
-            email=
-                data["email"].strip(),
-
-            address=
-                data["address"].strip(),
-
-            city=
-                data["city"].strip(),
-
-            state=
-                data["state"].strip(),
-
-            zip_code=
-                data["zip"].strip(),
-
-            country=
-                data["country"].strip(),
-
-            subtotal=
-                subtotal,
-
-            shipping=
-                shipping,
-
-            total=
-                total,
-
-            reference=
-                reference,
-
-            status=
-                "pending",
-
-            order_channel=
-                order_channel,
-
-            payment_method=
-                order_method,
+            order_number=order_number,
+            first_name=form.cleaned_data["first_name"],
+            last_name=form.cleaned_data["last_name"],
+            email=form.cleaned_data["email"],
+            phone=form.cleaned_data["phone"],
+            address=form.cleaned_data["address"],
+            city=form.cleaned_data["city"],
+            state=form.cleaned_data["state"],
+            zip_code=form.cleaned_data["zip"],
+            country=form.cleaned_data["country"],
+            delivery_location=delivery_location,
+            delivery_fee=delivery_fee,
+            subtotal=subtotal,
+            processing_fee=processing_fee,
+            total=total,
+            reference=reference,
+            product_payment_status="pending",
+            delivery_payment_status="pending",
+            delivery_payment_method="pay_on_delivery",
+            order_method=order_method,
+            status="pending",
         )
 
-
-        # Create products belonging to order
-
-        for checked_item in checked_items:
-
-            product = checked_item[
-                "product"
-            ]
-
-            quantity = checked_item[
-                "quantity"
-            ]
-
+        for item in cart_data["items"]:
+            product = item["product"]
+            quantity = item["quantity"]
 
             OrderItem.objects.create(
-
-                order=
-                    order,
-
-                product=
-                    product,
-
-                product_name=
-                    product.name,
-
-                unit_price=
-                    product.price,
-
-                quantity=
-                    quantity
+                order=order,
+                product=product,
+                product_name=product.name,
+                unit_price=product.price,
+                quantity=quantity,
             )
 
-
-    # =====================================================
-    # WHATSAPP ORDER
-    # =====================================================
+    # -----------------------------------------------------
+    # ORDER VIA WHATSAPP
+    # -----------------------------------------------------
 
     if order_method == "whatsapp":
-
-        message_lines = [
-
-            "Hello Arikey Skincare,",
-
-            "",
-
-            "I would like to place this order:",
-
-            "",
-
-            f"Order Reference: {order.reference}",
-
-            "",
-        ]
-
-
-        # Add products to WhatsApp message
-
-        for checked_item in checked_items:
-
-            product = checked_item[
-                "product"
-            ]
-
-            quantity = checked_item[
-                "quantity"
-            ]
-
-
-            message_lines.append(
-                f"{product.name} x {quantity}"
-            )
-
-
-        # Add total and closing message
-
-        message_lines.extend(
-            [
-                "",
-                f"Total: ₦{order.total:,.0f}",
-                "",
-                "Please confirm my order. Thank you."
-            ]
-        )
-
-
-        whatsapp_message = "\n".join(
-            message_lines
-        )
-
-
-        # Get WhatsApp number from settings.py
-
         whatsapp_number = getattr(
             settings,
             "WHATSAPP_NUMBER",
-            ""
-        )
+            "",
+        ).strip()
 
-
-        whatsapp_url = ""
-
-
-        if whatsapp_number:
-
-            whatsapp_url = (
-                "https://wa.me/"
-                + whatsapp_number
-                + "?text="
-                + quote(
-                    whatsapp_message
-                )
+        if not whatsapp_number:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "WhatsApp ordering is not configured.",
+                },
+                status=500,
             )
 
+        product_lines = []
 
-        # Send WhatsApp information back to frontend
+        for item in order.items.all():
+            product_lines.append(
+                f"{item.product_name} x {item.quantity} "
+                f"- ₦{item.line_total:,.0f}"
+            )
+
+        products_text = "\n".join(product_lines)
+
+        delivery_location_text = (
+            f"{delivery_location.city_area}, "
+            f"{delivery_location.state_region}, "
+            f"{delivery_location.country}"
+        )
+
+        if delivery_location.landmark:
+            delivery_location_text += (
+                f" — {delivery_location.landmark}"
+            )
+
+        if delivery_location.delivery_type == "fixed":
+            delivery_fee_text = (
+                f"₦{order.delivery_fee:,.0f} "
+                "(Pay on Delivery)"
+            )
+        else:
+            delivery_fee_text = (
+                "To be confirmed with seller on WhatsApp"
+            )
+
+        whatsapp_message = f"""
+Hello Arikey Skincare,
+
+I would like to place an order.
+
+ORDER DETAILS
+
+Order Number: {order.order_number}
+
+Customer:
+{order.first_name} {order.last_name}
+
+Phone:
+{order.phone}
+
+Email:
+{order.email}
+
+Address:
+{order.address}
+
+City:
+{order.city}
+
+State:
+{order.state}
+
+Country:
+{order.country}
+
+DELIVERY
+
+Selected Delivery Location:
+{delivery_location_text}
+
+Delivery Fee:
+{delivery_fee_text}
+
+Delivery Payment:
+PENDING — Pay on Delivery
+
+PRODUCTS
+
+{products_text}
+
+Product Subtotal:
+₦{order.subtotal:,.0f}
+
+Product Payment:
+PENDING
+
+Please confirm my order and payment details.
+""".strip()
+
+        whatsapp_url = (
+            "https://wa.me/"
+            + whatsapp_number
+            + "?text="
+            + quote(whatsapp_message)
+        )
 
         return JsonResponse(
             {
                 "success": True,
-
-                "order_method":
-                    "whatsapp",
-
-                "reference":
-                    order.reference,
-
-                "total":
-                    float(order.total),
-
-                "whatsapp_url":
-                    whatsapp_url,
-
-                "whatsapp_message":
-                    whatsapp_message,
+                "order_method": "whatsapp",
+                "order_number": order.order_number,
+                "whatsapp_url": whatsapp_url,
             }
         )
 
+    # -----------------------------------------------------
+    # PAYSTACK
+    # -----------------------------------------------------
 
-    # =====================================================
-    # PAYSTACK ORDER
-    # =====================================================
+    paystack_secret_key = getattr(
+        settings,
+        "PAYSTACK_SECRET_KEY",
+        "",
+    ).strip()
 
-    # Check that Paystack secret key exists
-
-    if not settings.PAYSTACK_SECRET_KEY:
-
+    if not paystack_secret_key:
         return JsonResponse(
             {
                 "success": False,
-                "error": "Paystack is not configured."
+                "error": "Paystack is not configured.",
             },
-            status=500
+            status=500,
         )
 
     callback_url = request.build_absolute_uri(
@@ -509,422 +538,386 @@ def create_order(request):
         "reference": order.reference,
         "currency": "NGN",
         "callback_url": callback_url,
+        "metadata": json.dumps(
+            {
+                "order_number": order.order_number,
+                "phone": order.phone,
+                "delivery_location_id": delivery_location.id,
+            }
+        ),
     }
 
-
-    # -----------------------------------------------------
-    # INITIALIZE PAYSTACK PAYMENT
-    # -----------------------------------------------------
-
     try:
-
         paystack_response = requests.post(
-
             "https://api.paystack.co/transaction/initialize",
-
             headers={
-                "Authorization":
-                    f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-
-                "Content-Type":
-                    "application/json",
+                "Authorization": f"Bearer {paystack_secret_key}",
+                "Content-Type": "application/json",
             },
-
-            json=
-                paystack_data,
-
-            timeout=
-                30,
+            json=paystack_data,
+            timeout=30,
         )
 
+        paystack_result = paystack_response.json()
 
-        paystack_result = (
-            paystack_response.json()
-        )
-
-
-    # -----------------------------------------------------
-    # PAYSTACK CONNECTION ERROR
-    # -----------------------------------------------------
-
-    except requests.RequestException:
-
+    except (requests.RequestException, ValueError):
         return JsonResponse(
             {
                 "success": False,
-
-                "error": (
-                    "Could not connect to Paystack. "
-                    "Please try again."
-                )
+                "error": "Unable to connect to Paystack.",
             },
-            status=502
+            status=502,
         )
 
-
-    # -----------------------------------------------------
-    # INVALID RESPONSE FROM PAYSTACK
-    # -----------------------------------------------------
-
-    except ValueError:
-
+    if not paystack_response.ok or not paystack_result.get("status"):
         return JsonResponse(
             {
                 "success": False,
-
-                "error": (
-                    "Paystack returned "
-                    "an invalid response."
-                )
+                "error": paystack_result.get(
+                    "message",
+                    "Unable to start payment.",
+                ),
             },
-            status=502
+            status=400,
         )
-
-
-    # -----------------------------------------------------
-    # TEMPORARY TEST OUTPUT
-    # -----------------------------------------------------
-
-    print(
-        "PAYSTACK RESPONSE:",
-        paystack_result
-    )
-
-
-    # -----------------------------------------------------
-    # PAYSTACK REJECTED PAYMENT INITIALIZATION
-    # -----------------------------------------------------
-
-    if (
-        not paystack_response.ok
-        or
-        not paystack_result.get(
-            "status"
-        )
-    ):
-
-        return JsonResponse(
-            {
-                "success": False,
-
-                "error":
-                    paystack_result.get(
-                        "message",
-                        "Unable to start payment."
-                    )
-            },
-            status=400
-        )
-
-
-    # -----------------------------------------------------
-    # GET PAYSTACK PAYMENT URL
-    # -----------------------------------------------------
 
     try:
-
-        authorization_url = (
-            paystack_result[
-                "data"
-            ][
-                "authorization_url"
-            ]
-        )
-
-    except (
-        KeyError,
-        TypeError
-    ):
-
+        authorization_url = paystack_result["data"]["authorization_url"]
+    except (KeyError, TypeError):
         return JsonResponse(
             {
                 "success": False,
-
-                "error": (
-                    "Paystack did not return "
-                    "a payment link."
-                )
+                "error": "Paystack did not return a payment link.",
             },
-            status=502
+            status=502,
         )
-
-
-    # -----------------------------------------------------
-    # SEND PAYMENT LINK TO CHECKOUT PAGE
-    # -----------------------------------------------------
 
     return JsonResponse(
         {
             "success": True,
-
-            "order_method":
-                "paystack",
-
-            "reference":
-                order.reference,
-
-            "total":
-                float(order.total),
-
-            "authorization_url":
-                authorization_url,
+            "order_method": "paystack",
+            "order_number": order.order_number,
+            "reference": order.reference,
+            "authorization_url": authorization_url,
         }
     )
 
 
-def payment_callback(request):
+# =========================================================
+# PAYSTACK CALLBACK
+# =========================================================
 
-    reference = (
-        request.GET.get("reference")
-        or request.GET.get("trxref")
-    )
+def payment_callback(request):
+    reference = request.GET.get("reference")
 
     if not reference:
         return redirect("checkout")
 
     try:
         order = Order.objects.get(
-            reference=reference
+            reference=reference,
+            order_method="paystack",
         )
-
     except Order.DoesNotExist:
         return redirect("checkout")
 
-
-    # If already paid, don't verify again
-    if order.status == "paid":
+    if order.product_payment_status == "paid":
         return redirect(
-            f"/order-success.html?reference={order.reference}"
+            reverse("order-success")
+            + "?order="
+            + order.order_number
         )
 
+    paystack_secret_key = getattr(
+        settings,
+        "PAYSTACK_SECRET_KEY",
+        "",
+    ).strip()
 
-    if not settings.PAYSTACK_SECRET_KEY:
+    if not paystack_secret_key:
         return redirect("checkout")
-
 
     try:
         response = requests.get(
-            (
-                "https://api.paystack.co/"
-                f"transaction/verify/{reference}"
-            ),
-
+            f"https://api.paystack.co/transaction/verify/{reference}",
             headers={
-                "Authorization":
-                    f"Bearer {settings.PAYSTACK_SECRET_KEY}"
+                "Authorization": f"Bearer {paystack_secret_key}",
             },
-
             timeout=30,
         )
 
         result = response.json()
 
-    except (
-        requests.RequestException,
-        ValueError
-    ):
-        return redirect(
-            "checkout"
-        )
+    except (requests.RequestException, ValueError):
+        return redirect("checkout")
 
+    payment = result.get("data", {})
+    expected_amount = int(order.total * 100)
 
-    if (
-        not response.ok
-        or not result.get("status")
-    ):
-        return redirect(
-            "checkout"
-        )
-
-
-    payment = result.get(
-        "data",
-        {}
-    )
-
-
-    # ---------------------------------
-    # VERIFY PAYMENT DETAILS
-    # ---------------------------------
-
-    expected_amount = int(
-        order.total * 100
-    )
-
-
-    payment_successful = (
-        payment.get("status") == "success"
+    payment_is_valid = (
+        response.ok
+        and result.get("status")
+        and payment.get("status") == "success"
         and payment.get("reference") == order.reference
         and payment.get("amount") == expected_amount
         and payment.get("currency") == "NGN"
     )
 
+    if payment_is_valid:
+        order.product_payment_status = "paid"
+        order.delivery_payment_status = "pending"
+        order.status = "confirmed"
 
-    if payment_successful:
-
-        order.status = "paid"
-        order.save()
-
-        return redirect(
-            f"/order-success.html"
-            f"?reference={order.reference}"
+        order.save(
+            update_fields=[
+                "product_payment_status",
+                "delivery_payment_status",
+                "status",
+            ]
         )
 
+        return redirect(
+            reverse("order-success")
+            + "?order="
+            + order.order_number
+        )
+
+    order.product_payment_status = "failed"
+    order.save(
+        update_fields=[
+            "product_payment_status",
+        ]
+    )
 
     return redirect(
-        "/checkout.html?payment=failed"
+        reverse("checkout")
+        + "?payment=failed"
     )
 
+
+# =========================================================
+# ORDER SUCCESS PAGE
+# =========================================================
 
 def order_success(request):
+    order_number = request.GET.get("order")
 
-    reference = request.GET.get(
-        "reference"
-    )
+    if not order_number:
+        return redirect("home-page")
 
-    order = None
+    try:
+        order = (
+            Order.objects
+            .prefetch_related("items")
+            .select_related("delivery_location")
+            .get(
+                order_number=order_number,
+                product_payment_status="paid",
+                order_method="paystack",
+            )
+        )
+    except Order.DoesNotExist:
+        return redirect("home-page")
 
-    if reference:
+    item_lines = []
 
-        try:
-            order = Order.objects.get(
-                reference=reference,
-                status="paid"
+    for item in order.items.all():
+        item_lines.append(
+            f"{item.product_name} x {item.quantity} "
+            f"- ₦{item.line_total:,.0f}"
+        )
+
+    products_text = "\n".join(item_lines)
+
+    if order.delivery_location:
+        delivery_location_text = (
+            f"{order.delivery_location.city_area}, "
+            f"{order.delivery_location.state_region}, "
+            f"{order.delivery_location.country}"
+        )
+
+        if order.delivery_location.landmark:
+            delivery_location_text += (
+                f" — {order.delivery_location.landmark}"
             )
 
-        except Order.DoesNotExist:
-            order = None
+        if order.delivery_location.delivery_type == "fixed":
+            delivery_fee_text = (
+                f"₦{order.delivery_fee:,.0f} "
+                "(Pay on Delivery)"
+            )
+        else:
+            delivery_fee_text = (
+                "To be confirmed with seller on WhatsApp"
+            )
+    else:
+        delivery_location_text = "Not selected"
+        delivery_fee_text = "To be confirmed"
 
+    message = f"""
+Hello Arikey Skincare,
+
+I just placed and paid for an order on your website.
+
+ORDER DETAILS
+
+Order Number: {order.order_number}
+
+Customer:
+{order.first_name} {order.last_name}
+
+Phone:
+{order.phone}
+
+Email:
+{order.email}
+
+Address:
+{order.address}
+
+City:
+{order.city}
+
+State:
+{order.state}
+
+Country:
+{order.country}
+
+DELIVERY
+
+Selected Delivery Location:
+{delivery_location_text}
+
+Delivery Fee:
+{delivery_fee_text}
+
+Delivery Payment:
+PENDING — Pay on Delivery
+
+PRODUCTS
+
+{products_text}
+
+PAYMENT
+
+Product Subtotal:
+₦{order.subtotal:,.0f}
+
+Payment Processing Fee:
+₦{order.processing_fee:,.0f}
+
+Amount Paid Online:
+₦{order.total:,.0f}
+
+Product Payment:
+PAID
+
+I would like to arrange delivery.
+""".strip()
+
+    whatsapp_number = getattr(
+        settings,
+        "WHATSAPP_NUMBER",
+        "",
+    ).strip()
+
+    whatsapp_url = ""
+
+    if whatsapp_number:
+        whatsapp_url = (
+            "https://wa.me/"
+            + whatsapp_number
+            + "?text="
+            + quote(message)
+        )
 
     return render(
         request,
         "order-success.html",
         {
-            "order": order
-        }
+            "order": order,
+            "whatsapp_url": whatsapp_url,
+        },
     )
-    
-    # =========================================================
+
+
+# =========================================================
 # PAYSTACK WEBHOOK
 # =========================================================
 
 @csrf_exempt
 @require_POST
 def paystack_webhook(request):
-
-    secret_key = settings.PAYSTACK_SECRET_KEY
+    secret_key = getattr(
+        settings,
+        "PAYSTACK_SECRET_KEY",
+        "",
+    ).strip()
 
     if not secret_key:
-        return HttpResponse(
-            status=500
-        )
-
-
-    # -----------------------------------------------------
-    # VERIFY PAYSTACK SIGNATURE
-    # -----------------------------------------------------
+        return HttpResponse(status=500)
 
     paystack_signature = request.headers.get(
         "x-paystack-signature",
-        ""
+        "",
     )
 
     calculated_signature = hmac.new(
         secret_key.encode("utf-8"),
         request.body,
-        hashlib.sha512
+        hashlib.sha512,
     ).hexdigest()
-
 
     if not hmac.compare_digest(
         calculated_signature,
-        paystack_signature
+        paystack_signature,
     ):
-        return HttpResponse(
-            status=400
-        )
-
-
-    # -----------------------------------------------------
-    # READ EVENT
-    # -----------------------------------------------------
+        return HttpResponse(status=400)
 
     try:
-        event = json.loads(
-            request.body
-        )
-
+        event = json.loads(request.body)
     except json.JSONDecodeError:
-        return HttpResponse(
-            status=400
-        )
-
-
-    # -----------------------------------------------------
-    # SUCCESSFUL PAYMENT
-    # -----------------------------------------------------
+        return HttpResponse(status=400)
 
     if event.get("event") == "charge.success":
-
-        payment = event.get(
-            "data",
-            {}
-        )
-
-        reference = payment.get(
-            "reference"
-        )
-
+        payment = event.get("data", {})
+        reference = payment.get("reference")
 
         if reference:
-
             try:
                 order = Order.objects.get(
                     reference=reference,
-                    payment_method="paystack"
+                    order_method="paystack",
                 )
-
             except Order.DoesNotExist:
-
-                # We still acknowledge the webhook
-                # so Paystack does not keep retrying.
-                return HttpResponse(
-                    status=200
-                )
-
+                return HttpResponse(status=200)
 
             expected_amount = int(
                 order.total * 100
             )
 
-
             payment_is_valid = (
-
-                payment.get("status")
-                == "success"
-
-                and payment.get("reference")
-                == order.reference
-
-                and payment.get("amount")
-                == expected_amount
-
-                and payment.get("currency")
-                == "NGN"
+                payment.get("status") == "success"
+                and payment.get("reference") == order.reference
+                and payment.get("amount") == expected_amount
+                and payment.get("currency") == "NGN"
             )
-
 
             if (
                 payment_is_valid
-                and order.status != "paid"
+                and order.product_payment_status != "paid"
             ):
+                order.product_payment_status = "paid"
+                order.delivery_payment_status = "pending"
+                order.status = "confirmed"
 
-                order.status = "paid"
+                order.save(
+                    update_fields=[
+                        "product_payment_status",
+                        "delivery_payment_status",
+                        "status",
+                    ]
+                )
 
-                order.save()
-
-
-    # Paystack expects 200 OK
-    return HttpResponse(
-        status=200
-    )
+    return HttpResponse(status=200)

@@ -7,7 +7,8 @@
 <title>Shop All Products — Arikey Skincare</title>
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --cream:#faf6ef;
@@ -24,12 +25,12 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
   body{
-    font-family:'Jost',sans-serif;
+    font-family:'Manrope',sans-serif;
     color:var(--ink);
     background:var(--cream);
     -webkit-font-smoothing:antialiased;
   }
-  h1,h2,.serif{font-family:'Playfair Display',serif;}
+  h1,h2,.serif{font-family:'Manrope',sans-serif;}
   a{color:inherit;text-decoration:none;}
   button,select{font-family:inherit;}
   .wrap{max-width:1320px;margin:0 auto;padding:0 40px;}
@@ -69,7 +70,7 @@
 
   .mobile-menu{position:fixed;inset:0;background:var(--ink);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;opacity:0;visibility:hidden;transform:translateY(-12px);transition:.3s ease;}
   .mobile-menu.open{opacity:1;visibility:visible;transform:translateY(0);}
-  .mobile-menu a{color:#fff;font-size:1.3rem;font-family:'Playfair Display',serif;}
+  .mobile-menu a{color:#fff;font-size:1.3rem;font-family:'Manrope',sans-serif;}
   .mobile-close{position:absolute;top:28px;right:32px;color:#fff;font-size:1.8rem;width:30px;height:30px;}
 
   /* ---------- PAGE HEADER ---------- */
@@ -140,11 +141,11 @@
   .badge-main{background:var(--coral);}
   .badge-sale{background:var(--amber);}
   .p-cat{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
-  .p-name{font-family:'Playfair Display',serif;font-weight:600;font-size:1.05rem;margin-bottom:8px;line-height:1.3;min-height:2.6em;}
+  .p-name{font-family:'Manrope',sans-serif;font-weight:600;font-size:1.05rem;margin-bottom:8px;line-height:1.3;min-height:2.6em;}
   .p-rating{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
   .stars{color:var(--gold);font-size:.85rem;letter-spacing:1px;}
   .p-count{color:var(--ink-soft);font-size:.78rem;}
-  .p-price{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;}
+  .p-price{font-family:'Manrope',sans-serif;font-weight:700;font-size:1.1rem;}
   .p-price .was{font-weight:400;font-size:.9rem;color:var(--ink-soft);text-decoration:line-through;margin-left:8px;}
   .p-size{font-size:.78rem;color:var(--ink-soft);margin-top:2px;}
 
@@ -189,7 +190,7 @@
   /* ---------- FOOTER ---------- */
   footer{background:#170f0c;color:rgba(255,255,255,.7);padding:80px 0 0;}
   .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;padding-bottom:60px;}
-  .footer-logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:16px;}
+  .footer-logo{font-family:'Manrope',sans-serif;font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:16px;}
   .footer-desc{font-size:.92rem;line-height:1.75;margin-bottom:24px;max-width:340px;}
   .socials{display:flex;gap:12px;}
   .social-ic{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;transition:.3s;}
@@ -382,7 +383,7 @@
   .mobile-menu a{
     color:#fff;
     font-size:1.2rem;
-    font-family:'Playfair Display',serif;
+    font-family:'Manrope',sans-serif;
   }
 
   .mobile-close{
@@ -545,7 +546,6 @@
           <a class="social-ic" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.97.24 2.43.4a4.9 4.9 0 0 1 1.77 1.15 4.9 4.9 0 0 1 1.15 1.77c.16.46.35 1.26.4 2.43.07 1.25.07 1.65.07 4.85s0 3.6-.07 4.85c-.05 1.17-.24 1.97-.4 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.46.16-1.26.35-2.43.4-1.25.07-1.65.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.97-.24-2.43-.4a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.16-.46-.35-1.26-.4-2.43C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.85c.05-1.17.24-1.97.4-2.43A4.9 4.9 0 0 1 3.82 3a4.9 4.9 0 0 1 1.77-1.15c.46-.16 1.26-.35 2.43-.4C9.27 1.38 9.7 1.38 12 1.38zM12 6.3a5.7 5.7 0 1 0 0 11.4 5.7 5.7 0 0 0 0-11.4zm0 9.4a3.7 3.7 0 1 1 0-7.4 3.7 3.7 0 0 1 0 7.4zm5.9-9.6a1.33 1.33 0 1 1-2.66 0 1.33 1.33 0 0 1 2.66 0z"/></svg></a>
           <a class="social-ic" href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V8c0-.9.25-1.5 1.55-1.5H16.7V3.7C16.4 3.66 15.4 3.57 14.24 3.57c-2.4 0-4.04 1.46-4.04 4.15V9.9H7.5V13h2.7v8h3.3z"/></svg></a>
           <a class="social-ic" href="#" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3v13.2a2.6 2.6 0 1 1-2.1-2.55v-3.05a5.6 5.6 0 1 0 5.1 5.58V8.9a7.4 7.4 0 0 0 4.4 1.44V7.35c-2.4 0-4.4-1.9-4.4-4.35v-1z"/></svg></a>
-          <a class="social-ic" href="#" aria-label="Pinterest"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.65 19.3c-.05-.8-.1-2.05.02-2.93.11-.8.75-5.1.75-5.1s-.19-.38-.19-.94c0-.88.51-1.54 1.15-1.54.54 0 .8.4.8.89 0 .54-.35 1.36-.53 2.11-.15.63.32 1.14.94 1.14 1.13 0 1.99-1.19 1.99-2.9 0-1.52-1.09-2.58-2.65-2.58-1.8 0-2.86 1.35-2.86 2.75 0 .54.21 1.13.47 1.44a.19.19 0 0 1 .04.18c-.05.2-.16.63-.18.72-.03.12-.1.15-.22.09-.85-.4-1.38-1.63-1.38-2.63 0-2.14 1.56-4.11 4.48-4.11 2.35 0 4.18 1.68 4.18 3.92 0 2.34-1.47 4.22-3.52 4.22-.69 0-1.33-.36-1.55-.78l-.42 1.6c-.15.58-.56 1.31-.83 1.75A10 10 0 1 0 12 2z"/></svg></a>
         </div>
       </div>
       <div>
@@ -563,7 +563,7 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; <span id="year"></span> Arikey Skincare. All rights reserved.</span>
-      <div class="pay-icons"><span>Free shipping over ₦30,000</span><span>VISA</span><span>MC</span><span>PayPal</span></div>
+      <div class="pay-icons"><span>Delivery calculated at checkout</span><span>VISA</span><span>MC</span></div>
     </div>
   </div>
 </footer>

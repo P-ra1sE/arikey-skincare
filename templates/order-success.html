@@ -22,11 +22,8 @@
     >
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap"
-        rel="stylesheet"
-    >
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
 
@@ -46,7 +43,7 @@
         }
 
         body{
-            font-family:'Jost',sans-serif;
+            font-family:'Manrope',sans-serif;
             background:var(--cream);
             color:var(--ink);
 
@@ -97,7 +94,7 @@
         }
 
         h1{
-            font-family:'Playfair Display',serif;
+            font-family:'Manrope',sans-serif;
 
             font-size:2rem;
             font-weight:600;
@@ -207,89 +204,165 @@
 
         {% if order %}
 
-            <div class="success-icon">
-                ✓
-            </div>
+    <div class="success-icon">
+        ✓
+    </div>
 
-            <h1>
-                Thank You!
-            </h1>
+    <h1>
+        Payment Successful!
+    </h1>
 
-            <p class="message">
-                Your payment was successful and
-                your order has been received.
-            </p>
-
-            <div class="order-box">
-
-                <div class="order-row">
-                    <span>
-                        Order Reference
-                    </span>
-
-                    <strong>
-                        {{ order.reference }}
-                    </strong>
-                </div>
-
-                <div class="order-row">
-                    <span>
-                        Total
-                    </span>
-
-                    <strong>
-                        ₦{{ order.total }}
-                    </strong>
-                </div>
-
-                <div class="order-row">
-                    <span>
-                        Status
-                    </span>
-
-                    <strong>
-                        Paid
-                    </strong>
-                </div>
-
-            </div>
-
-            <a
-                href="{% url 'home-page' %}"
-                class="home-btn"
-            >
-                Continue Shopping
-            </a>
+    <p class="message">
+        Your product payment has been confirmed.
+        Please arrange your delivery through WhatsApp.
+    </p>
 
 
-            <script>
+    <div class="order-box">
 
-                localStorage.removeItem(
-                    "arikeyBag"
-                );
+        <div class="order-row">
 
-            </script>
+            <span>
+                Order Number
+            </span>
+
+            <strong>
+                {{ order.order_number }}
+            </strong>
+
+        </div>
 
 
-        {% else %}
+        <div class="order-row">
 
-            <h1>
-                Order Not Found
-            </h1>
+            <span>
+                Product Payment
+            </span>
 
-            <p class="message">
-                We couldn't find a verified
-                paid order for this reference.
-            </p>
+            <strong>
+                Paid
+            </strong>
 
-            <a
-                href="{% url 'home-page' %}"
-                class="home-btn"
-            >
-                Return Home
-            </a>
+        </div>
 
-        {% endif %}
+
+        <div class="order-row">
+
+            <span>
+                Amount Paid Online
+            </span>
+
+            <strong>
+                ₦{{ order.total|floatformat:0 }}
+            </strong>
+
+        </div>
+
+
+        <div class="order-row">
+
+            <span>
+                Delivery Location
+            </span>
+
+            <strong>
+                {{ order.delivery_zone.name }}
+            </strong>
+
+        </div>
+
+
+        <div class="order-row">
+
+            <span>
+                Delivery Fee
+            </span>
+
+            <strong>
+                ₦{{ order.delivery_fee|floatformat:0 }}
+            </strong>
+
+        </div>
+
+
+        <div class="order-row">
+
+            <span>
+                Delivery Payment
+            </span>
+
+            <strong>
+                Pending — Pay on Delivery
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <a
+        href="{{ whatsapp_url }}"
+        class="home-btn"
+        id="whatsappDeliveryBtn"
+    >
+        Arrange Delivery on WhatsApp
+    </a>
+
+
+    <p
+        style="
+            font-size:.65rem;
+            margin-top:10px;
+            color:var(--ink-soft);
+        "
+    >
+        WhatsApp will open automatically.
+        If it doesn't, tap the button above.
+    </p>
+
+
+    <script>
+
+        /*
+        Payment has already been verified,
+        so NOW it is safe to clear the cart.
+        */
+
+        localStorage.removeItem(
+            "arikeyBag"
+        );
+
+
+        /*
+        Give the customer time to see the
+        successful payment confirmation,
+        then open WhatsApp.
+        */
+
+        setTimeout(function(){
+
+            window.location.href =
+                "{{ whatsapp_url|escapejs }}";
+
+        }, 2500);
+
+    </script>
+
+
+{% else %}
+
+    <h1>
+        Order Not Found
+    </h1>
+
+    <a
+        href="{% url 'home-page' %}"
+        class="home-btn"
+    >
+        Return Home
+    </a>
+
+{% endif %}
 
     </main>
 

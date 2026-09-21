@@ -13,43 +13,64 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+load_dotenv(
+    BASE_DIR / ".env"
+)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-development-only-key"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY"
 )
 
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY environment variable is missing."
+    )
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get(
-    "DJANGO_DEBUG",
+DEBUG = os.getenv(
+    "DEBUG",
     "True"
 ).lower() == "true"
 
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "your-local-development-secret-key"
+)
+
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS",
-        "127.0.0.1,localhost"
-    ).split(",")
-    if host.strip()
+    "127.0.0.1",
+    "localhost",
+    ".vercel.app",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.environ.get(
-        "DJANGO_CSRF_TRUSTED_ORIGINS",
-        ""
-    ).split(",")
-    if origin.strip()
+    "https://*.vercel.app",
 ]
 
+if not DEBUG:
 
+    SECURE_SSL_REDIRECT = True
+
+    SESSION_COOKIE_SECURE = True
+
+    CSRF_COOKIE_SECURE = True
+
+    # Vercel/proxies tell Django the original
+    # request was HTTPS using this header.
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https"
+    )
+
+    # Start with a short HSTS period.
+    # We can increase this after deployment is verified.
+    SECURE_HSTS_SECONDS = 3600
 # Application definition
 
 INSTALLED_APPS = [
@@ -156,12 +177,26 @@ STORAGES = {
     },
 }
 
-WHATSAPP_NUMBER = os.environ.get(
-    "WHATSAPP_NUMBER",
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
     ""
 )
-PAYSTACK_SECRET_KEY = os.environ.get(
+
+if DATABASE_URL:
+    DATABASES["default"] = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=True
+    )
+
+PAYSTACK_SECRET_KEY = os.getenv(
     "PAYSTACK_SECRET_KEY",
+    ""
+).strip()
+
+
+WHATSAPP_NUMBER = os.getenv(
+    "WHATSAPP_NUMBER",
     ""
 ).strip()
 # Default primary key field type
